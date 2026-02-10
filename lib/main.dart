@@ -1,4 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:deep_work/insightsTab.dart';
+import 'package:deep_work/sessionsTab.dart';
+import 'package:deep_work/settingsTab.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -20,6 +24,12 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+// TAB BAR ----------------------------------
 
 class MainTabView extends StatelessWidget {
   const MainTabView({super.key});
@@ -65,6 +75,62 @@ class MainTabView extends StatelessWidget {
   }
 }
 
+
+
+
+
+
+// MAIN SCREEN ----------------------------------
+class _FocusMetric extends StatelessWidget {
+  const _FocusMetric({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.15),
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        const SizedBox(height: 12),
+
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 22,
+            color: CupertinoColors.label,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: CupertinoColors.secondaryLabel,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
 
@@ -73,14 +139,6 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -93,159 +151,95 @@ class _HomeTabState extends State<HomeTab> {
         ),
       ),
       child: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'You have pushed the button this many times:',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: CupertinoColors.secondaryLabel,
-                ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Good morning, Gadiel',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 20,
+                      color: CupertinoColors.label,
+                    ),
+                  ),
+                  Text(
+                    'Ready for a deep work?',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: CupertinoColors.secondaryLabel,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              Text(
-                '$_counter',
-                style: const TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: CupertinoColors.label,
+            ),
+
+
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: CupertinoColors.systemGrey.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 40),
-              CupertinoButton.filled(
-                onPressed: _incrementCounter,
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
+
+
+
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(width: 8),
-                    Text('Start Focus Session'),
+                    const Text(
+                      "Today's Focus",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                        color: CupertinoColors.label,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _FocusMetric(
+                          icon: CupertinoIcons.clock,
+                          value: '0m',
+                          label: 'Focus time',
+                          color: CupertinoColors.systemBlue,
+                        ),
+                        _FocusMetric(
+                          icon: CupertinoIcons.waveform,
+                          value: '0',
+                          label: 'Sessions',
+                          color: CupertinoColors.systemGreen,
+                        ),
+                        _FocusMetric(
+                          icon: CupertinoIcons.chart_bar,
+                          value: '0%',
+                          label: 'Completed',
+                          color: CupertinoColors.systemPurple,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SessionsTab extends StatelessWidget {
-  const SessionsTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text(
-          'Sessions',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                CupertinoIcons.clock,
-                size: 64,
-                color: CupertinoColors.systemGrey,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Your focus sessions will appear here',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: CupertinoColors.secondaryLabel,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class InsightsTab extends StatelessWidget {
-  const InsightsTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text(
-          'Insights',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                CupertinoIcons.chart_bar,
-                size: 64,
-                color: CupertinoColors.systemGrey,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Your insights and analytics will appear here',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: CupertinoColors.secondaryLabel,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SettingsTab extends StatelessWidget {
-  const SettingsTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text(
-          'Settings',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                CupertinoIcons.settings,
-                size: 64,
-                color: CupertinoColors.systemGrey,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'App settings will appear here',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: CupertinoColors.secondaryLabel,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
