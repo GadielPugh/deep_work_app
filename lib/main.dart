@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:deep_work/insightsTab.dart';
 import 'package:deep_work/sessionsTab.dart';
 import 'package:deep_work/settingsTab.dart';
+import 'package:deep_work/startSession.dart';
 
 
 void main() {
@@ -48,7 +49,7 @@ class MainTabView extends StatelessWidget {
             label: 'Sessions',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.chart_bar),
+            icon: Icon(CupertinoIcons.chart_bar_alt_fill),
             label: 'Insights',
           ),
           BottomNavigationBarItem(
@@ -168,6 +169,9 @@ class _HomeTabState extends State<HomeTab> {
                       color: CupertinoColors.label,
                     ),
                   ),
+
+                  const SizedBox(height: 5),
+
                   Text(
                     'Ready for a deep work?',
                     style: TextStyle(
@@ -228,7 +232,7 @@ class _HomeTabState extends State<HomeTab> {
                           color: CupertinoColors.systemGreen,
                         ),
                         _FocusMetric(
-                          icon: CupertinoIcons.chart_bar,
+                          icon: CupertinoIcons.chart_bar_alt_fill,
                           value: '0%',
                           label: 'Completed',
                           color: CupertinoColors.systemPurple,
@@ -236,6 +240,22 @@ class _HomeTabState extends State<HomeTab> {
                       ],
                     ),
                   ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+              child: SizedBox(
+                width: double.infinity,
+                child: CupertinoButton.filled(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (context) => const StartSessionPage(),
+                      ),
+                    );
+                  },
+                  child: const Text('Start Focus Session'),
                 ),
               ),
             ),
