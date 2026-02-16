@@ -130,9 +130,19 @@ class _StartSessionPageState extends State<StartSessionPage> {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? CupertinoColors.activeBlue.withOpacity(0.1)
-              : CupertinoColors.tertiarySystemFill,
-          borderRadius: BorderRadius.circular(12),
+              ? CupertinoColors.activeBlue.withValues(alpha: 0.1)
+              : CupertinoColors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+                    BoxShadow(
+                      color: isSelected
+                        ? const Color.fromARGB(255, 255, 255, 255)
+                        : CupertinoColors.activeBlue,
+                      //width: isSelected ? 5 : 1,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           border: Border.all(
             color: isSelected
                 ? CupertinoColors.activeBlue

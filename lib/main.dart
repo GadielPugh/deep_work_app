@@ -156,11 +156,13 @@ class _HomeTabState extends State<HomeTab> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
+                  
                   Text(
                     'Good morning, Gadiel',
                     style: TextStyle(
@@ -170,7 +172,7 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                   ),
 
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
 
                   Text(
                     'Ready for a deep work?',
@@ -179,6 +181,7 @@ class _HomeTabState extends State<HomeTab> {
                       color: CupertinoColors.secondaryLabel,
                     ),
                   ),
+
                 ],
               ),
             ),
@@ -194,10 +197,10 @@ class _HomeTabState extends State<HomeTab> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: CupertinoColors.systemGrey.withOpacity(0.2),
+                      color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
-                    ),
+                    ), 
                   ],
                 ),
 
