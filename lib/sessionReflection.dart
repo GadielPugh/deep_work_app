@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 
+import 'package:deep_work/database/session_repository.dart';
+import 'package:deep_work/session_type.dart';
+
 enum CompletionStatus {
   yes,
   partially,
@@ -11,10 +14,16 @@ class SessionReflectionPage extends StatefulWidget {
     super.key,
     required this.goal,
     required this.focusMinutes,
+    required this.sessionType,
+    required this.startedAt,
+    required this.stoppedAt,
   });
 
   final String goal;
   final int focusMinutes;
+  final SessionType sessionType;
+  final DateTime startedAt;
+  final DateTime stoppedAt;
 
   @override
   State<SessionReflectionPage> createState() => _SessionReflectionPageState();
@@ -30,7 +39,21 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
     super.dispose();
   }
 
-  void _finishSession() {
+  Future<void> _finishSession() async {
+    final status = _selectedStatus;
+    if (status == null) return;
+    final reflection = _reflectionController.text.trim();
+    final durationSeconds = widget.focusMinutes * 60;
+    await SessionRepository.insert(
+      intention: widget.goal,
+      category: widget.sessionType.name,
+      startedAt: widget.startedAt,
+      stoppedAt: widget.stoppedAt,
+      durationSeconds: durationSeconds,
+      outcome: status.name,
+      reflection: reflection.isEmpty ? null : reflection,
+    );
+    if (!mounted) return;
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
@@ -153,7 +176,7 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
               ),
               const SizedBox(height: 32),
               CupertinoButton.filled(
-                onPressed: _finishSession,
+                onPressed: _selectedStatus == null ? null : _finishSession,
                 child: const Text('Finish Session'),
               ),
             ],

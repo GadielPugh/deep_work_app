@@ -5,14 +5,17 @@ import 'package:deep_work/session_type.dart';
 import 'package:deep_work/sessionReflection.dart';
 
 class ProcessSessionPage extends StatefulWidget {
-  const ProcessSessionPage({
+  ProcessSessionPage({
     super.key,
     required this.sessionType,
     this.goal,
-  });
+    DateTime? sessionStartedAt,
+  }) : startedAt = sessionStartedAt ?? DateTime.now();
 
   final SessionType sessionType;
   final String? goal;
+  /// When this focus session was started (for DB and ML).
+  final DateTime startedAt;
 
   @override
   State<ProcessSessionPage> createState() => _ProcessSessionPageState();
@@ -58,11 +61,15 @@ class _ProcessSessionPageState extends State<ProcessSessionPage> {
   void _stopSession() {
     _timer?.cancel();
     final focusMinutes = _elapsedSeconds ~/ 60;
+    final stoppedAt = DateTime.now();
     Navigator.of(context).pushReplacement(
       CupertinoPageRoute(
         builder: (context) => SessionReflectionPage(
           goal: widget.goal ?? 'No intention set',
           focusMinutes: focusMinutes,
+          sessionType: widget.sessionType,
+          startedAt: widget.startedAt,
+          stoppedAt: stoppedAt,
         ),
       ),
     );

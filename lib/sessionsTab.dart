@@ -1,46 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:deep_work/database/session_repository.dart';
 import 'package:deep_work/sessionReflection.dart';
 import 'package:deep_work/session_model.dart';
 import 'package:deep_work/session_type.dart';
-
-// Mock data for development - replace with real data source later
-final List<Session> _mockSessions = [
-  Session(
-    intention: 'Complete chapter 3 of calculus textbook',
-    durationMinutes: 45,
-    outcome: CompletionStatus.yes,
-    dateTime: DateTime(2026, 2, 5, 9, 30),
-    sessionType: SessionType.reading,
-  ),
-  Session(
-    intention: 'Write essay introduction for history class',
-    durationMinutes: 30,
-    outcome: CompletionStatus.partially,
-    dateTime: DateTime(2026, 2, 5, 14, 15),
-    sessionType: SessionType.writing,
-  ),
-  Session(
-    intention: 'Debug authentication feature',
-    durationMinutes: 60,
-    outcome: CompletionStatus.yes,
-    dateTime: DateTime(2026, 2, 4, 10, 0),
-    sessionType: SessionType.coding,
-  ),
-  Session(
-    intention: 'Read research papers for thesis',
-    durationMinutes: 45,
-    outcome: CompletionStatus.no,
-    dateTime: DateTime(2026, 2, 4, 16, 45),
-    sessionType: SessionType.reading,
-  ),
-  Session(
-    intention: 'Review biology lecture notes',
-    durationMinutes: 25,
-    outcome: CompletionStatus.yes,
-    dateTime: DateTime(2026, 2, 3, 8, 0),
-    sessionType: SessionType.review,
-  ),
-];
 
 class SessionsTab extends StatefulWidget {
   const SessionsTab({super.key});
@@ -53,12 +15,21 @@ class _SessionsTabState extends State<SessionsTab> {
   final _searchController = TextEditingController();
   SessionType? _filterSessionType;
   CompletionStatus? _filterCompletion;
-  List<Session> _sessions = List.from(_mockSessions);
+  List<Session> _allSessions = [];
+  List<Session> _sessions = [];
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_filterSessions);
+    _loadSessions();
+  }
+
+  Future<void> _loadSessions() async {
+    final list = await SessionRepository.getAll();
+    if (!mounted) return;
+    setState(() => _allSessions = list);
+    _filterSessions();
   }
 
   @override
@@ -70,7 +41,7 @@ class _SessionsTabState extends State<SessionsTab> {
 
   void _filterSessions() {
     setState(() {
-      _sessions = _mockSessions.where((s) {
+      _sessions = _allSessions.where((s) {
         final matchesSearch = _searchController.text.isEmpty ||
             s.intention.toLowerCase().contains(_searchController.text.toLowerCase());
         final matchesType = _filterSessionType == null || s.sessionType == _filterSessionType;
@@ -93,8 +64,13 @@ class _SessionsTabState extends State<SessionsTab> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Sessions', style: TextStyle(fontWeight: FontWeight.w600)),
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Sessions', style: TextStyle(fontWeight: FontWeight.w600)),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _loadSessions,
+          child: const Icon(CupertinoIcons.refresh),
+        ),
       ),
       child: SafeArea(
         child: Column(
