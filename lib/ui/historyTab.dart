@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:deep_work/database/session_repository.dart';
-import 'package:deep_work/sessionReflection.dart';
+import 'package:deep_work/ui/sessions/sessionReflection.dart';
 import 'package:deep_work/session_model.dart';
 import 'package:deep_work/session_type.dart';
+import 'package:deep_work/state/session_state.dart';
 
 class SessionsTab extends StatefulWidget {
   const SessionsTab({super.key});
@@ -17,26 +17,36 @@ class _SessionsTabState extends State<SessionsTab> {
   CompletionStatus? _filterCompletion;
   List<Session> _allSessions = [];
   List<Session> _sessions = [];
+  late final SessionState _sessionState;
 
   @override
   void initState() {
     super.initState();
+    _sessionState = SessionState.instance;
     _searchController.addListener(_filterSessions);
-    _loadSessions();
-  }
-
-  Future<void> _loadSessions() async {
-    final list = await SessionRepository.getAll();
-    if (!mounted) return;
-    setState(() => _allSessions = list);
-    _filterSessions();
+    _sessionState.addListener(_onSessionsChanged);
+    if (_sessionState.isLoaded) {
+      _syncFromState();
+    } else {
+      _sessionState.load();
+    }
   }
 
   @override
   void dispose() {
+    _sessionState.removeListener(_onSessionsChanged);
     _searchController.removeListener(_filterSessions);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSessionsChanged() {
+    _syncFromState();
+  }
+
+  void _syncFromState() {
+    _allSessions = _sessionState.sessions;
+    _filterSessions();
   }
 
   void _filterSessions() {
@@ -64,13 +74,8 @@ class _SessionsTabState extends State<SessionsTab> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: const Text('Sessions', style: TextStyle(fontWeight: FontWeight.w600)),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _loadSessions,
-          child: const Icon(CupertinoIcons.refresh),
-        ),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Sessions', style: TextStyle(fontWeight: FontWeight.w600)),
       ),
       child: SafeArea(
         child: Column(

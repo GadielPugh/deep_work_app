@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:deep_work/insightsTab.dart';
-import 'package:deep_work/sessionsTab.dart';
-import 'package:deep_work/settingsTab.dart';
-import 'package:deep_work/startSession.dart';
+import 'package:deep_work/ui/insightsTab.dart';
+import 'package:deep_work/ui/historyTab.dart';
+import 'package:deep_work/ui/settingsTab.dart';
+import 'package:deep_work/ui/sessions/startSession.dart';
 
 
 void main() {

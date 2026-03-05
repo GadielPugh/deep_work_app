@@ -1,4 +1,4 @@
-import 'package:deep_work/sessionReflection.dart';
+import 'package:deep_work/ui/sessions/sessionReflection.dart';
 import 'package:deep_work/session_model.dart';
 import 'package:deep_work/session_type.dart';
 import 'package:sqflite/sqflite.dart';

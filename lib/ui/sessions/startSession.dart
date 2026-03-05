@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:deep_work/processSession.dart';
+import 'package:deep_work/ui/sessions/processSession.dart';
 import 'package:deep_work/session_type.dart' as st;
 
 class StartSessionPage extends StatefulWidget {
