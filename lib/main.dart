@@ -1,11 +1,14 @@
 import 'package:flutter/cupertino.dart';
-import 'package:deep_work/ui/insightsTab.dart';
-import 'package:deep_work/ui/historyTab.dart';
-import 'package:deep_work/ui/settingsTab.dart';
-import 'package:deep_work/ui/sessions/startSession.dart';
+import 'package:deep_work/state/home_page_state.dart';
+import 'package:deep_work/ui/3_insights/insightsTab.dart';
+import 'package:deep_work/ui/2_history/historyTab.dart';
+import 'package:deep_work/ui/4_settings/settingsTab.dart';
+import 'package:deep_work/ui/1_principal_function/startSession.dart';
+import 'package:deep_work/state/sessions_state.dart';
 
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SessionsState.instance.load();
   runApp(const MyApp());
 }
 
@@ -16,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       debugShowCheckedModeBanner: false,
-      title: 'DeepFocus',
+      title: 'DeepFocus', 
       theme: const CupertinoThemeData(
         primaryColor: CupertinoColors.systemBlue,
         brightness: Brightness.light,
@@ -140,6 +143,23 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
+  final _state = HomePageState.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _state.addListener(_onStateChanged);
+    _state.load();
+  }
+
+  @override
+  void dispose() {
+    _state.removeListener(_onStateChanged);
+    super.dispose();
+  }
+
+  void _onStateChanged() => setState(() {});
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -224,19 +244,19 @@ class _HomeTabState extends State<HomeTab> {
                       children: [
                         _FocusMetric(
                           icon: CupertinoIcons.clock,
-                          value: '0m',
+                          value: '${_state.focusTimeTodayMinutes}m',
                           label: 'Focus time',
                           color: CupertinoColors.systemBlue,
                         ),
                         _FocusMetric(
                           icon: CupertinoIcons.waveform,
-                          value: '0',
+                          value: '${_state.sessionCountToday}',
                           label: 'Sessions',
                           color: CupertinoColors.systemGreen,
                         ),
                         _FocusMetric(
                           icon: CupertinoIcons.chart_bar_alt_fill,
-                          value: '0%',
+                          value: '${_state.completedPercentToday}%',
                           label: 'Completed',
                           color: CupertinoColors.systemPurple,
                         ),

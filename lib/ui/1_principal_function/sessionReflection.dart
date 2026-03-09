@@ -1,14 +1,8 @@
 import 'package:flutter/cupertino.dart';
 
-import 'package:deep_work/database/session_repository.dart';
+import 'package:deep_work/models/completion_status.dart';
 import 'package:deep_work/session_type.dart';
-import 'package:deep_work/state/session_state.dart';
-
-enum CompletionStatus {
-  yes,
-  partially,
-  no,
-}
+import 'package:deep_work/state/sessions_state.dart';
 
 class SessionReflectionPage extends StatefulWidget {
   const SessionReflectionPage({
@@ -45,7 +39,8 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
     if (status == null) return;
     final reflection = _reflectionController.text.trim();
     final durationSeconds = widget.focusMinutes * 60;
-    await SessionRepository.insert(
+    // Event: save session → State Management → Storage Service
+    await SessionsState.instance.saveSession(
       intention: widget.goal,
       category: widget.sessionType.name,
       startedAt: widget.startedAt,
@@ -54,9 +49,6 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
       outcome: status.name,
       reflection: reflection.isEmpty ? null : reflection,
     );
-    // Refresh global session state so any listeners (History, Insights, etc.)
-    // see the new session automatically.
-    await SessionState.instance.reload();
     if (!mounted) return;
     Navigator.of(context).popUntil((route) => route.isFirst);
   }

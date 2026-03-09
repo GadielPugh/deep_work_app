@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:deep_work/session_type.dart';
-import 'package:deep_work/ui/sessions/sessionReflection.dart';
+import 'package:deep_work/ui/1_principal_function/sessionReflection.dart';
 
 class ProcessSessionPage extends StatefulWidget {
   ProcessSessionPage({

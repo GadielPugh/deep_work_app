@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:deep_work/ui/sessions/sessionReflection.dart';
+import 'package:deep_work/models/completion_status.dart';
 import 'package:deep_work/session_model.dart';
 import 'package:deep_work/session_type.dart';
-import 'package:deep_work/state/session_state.dart';
+import 'package:deep_work/state/sessions_page_state.dart';
 
 class SessionsTab extends StatefulWidget {
   const SessionsTab({super.key});
@@ -13,63 +13,25 @@ class SessionsTab extends StatefulWidget {
 
 class _SessionsTabState extends State<SessionsTab> {
   final _searchController = TextEditingController();
-  SessionType? _filterSessionType;
-  CompletionStatus? _filterCompletion;
-  List<Session> _allSessions = [];
-  List<Session> _sessions = [];
-  late final SessionState _sessionState;
+  late final SessionsPageState _state;
 
   @override
   void initState() {
     super.initState();
-    _sessionState = SessionState.instance;
-    _searchController.addListener(_filterSessions);
-    _sessionState.addListener(_onSessionsChanged);
-    if (_sessionState.isLoaded) {
-      _syncFromState();
-    } else {
-      _sessionState.load();
-    }
+    _state = SessionsPageState.instance;
+    _searchController.addListener(() => _state.setSearch(_searchController.text));
+    _state.addListener(_onStateChanged);
+    _state.load();
   }
 
   @override
   void dispose() {
-    _sessionState.removeListener(_onSessionsChanged);
-    _searchController.removeListener(_filterSessions);
+    _state.removeListener(_onStateChanged);
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onSessionsChanged() {
-    _syncFromState();
-  }
-
-  void _syncFromState() {
-    _allSessions = _sessionState.sessions;
-    _filterSessions();
-  }
-
-  void _filterSessions() {
-    setState(() {
-      _sessions = _allSessions.where((s) {
-        final matchesSearch = _searchController.text.isEmpty ||
-            s.intention.toLowerCase().contains(_searchController.text.toLowerCase());
-        final matchesType = _filterSessionType == null || s.sessionType == _filterSessionType;
-        final matchesCompletion = _filterCompletion == null || s.outcome == _filterCompletion;
-        return matchesSearch && matchesType && matchesCompletion;
-      }).toList();
-    });
-  }
-
-  void _setSessionTypeFilter(SessionType? type) {
-    _filterSessionType = type;
-    _filterSessions();
-  }
-
-  void _setCompletionFilter(CompletionStatus? status) {
-    _filterCompletion = status;
-    _filterSessions();
-  }
+  void _onStateChanged() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
@@ -108,8 +70,8 @@ class _SessionsTabState extends State<SessionsTab> {
                       children: [
                         _FilterChip(
                           label: 'All',
-                          isSelected: _filterSessionType == null,
-                          onTap: () => _setSessionTypeFilter(null),
+                          isSelected: _state.filterType == null,
+                          onTap: () => _state.setFilterType(null),
                         ),
                         const SizedBox(width: 8),
                         ...SessionType.values.map((type) => Padding(
@@ -117,8 +79,8 @@ class _SessionsTabState extends State<SessionsTab> {
                               child: _FilterChip(
                                 label: _sessionTypeLabel(type),
                                 icon: type.icon,
-                                isSelected: _filterSessionType == type,
-                                onTap: () => _setSessionTypeFilter(type),
+                                isSelected: _state.filterType == type,
+                                onTap: () => _state.setFilterType(type),
                               ),
                             )),
                       ],
@@ -132,29 +94,29 @@ class _SessionsTabState extends State<SessionsTab> {
                       children: [
                         _SmallFilterChip(
                           label: 'All',
-                          isSelected: _filterCompletion == null,
-                          onTap: () => _setCompletionFilter(null),
+                          isSelected: _state.filterCompletion == null,
+                          onTap: () => _state.setFilterCompletion(null),
                         ),
                         const SizedBox(width: 8),
                         _SmallFilterChip(
                           label: 'Done',
                           color: CupertinoColors.systemGreen,
-                          isSelected: _filterCompletion == CompletionStatus.yes,
-                          onTap: () => _setCompletionFilter(CompletionStatus.yes),
+                          isSelected: _state.filterCompletion == CompletionStatus.yes,
+                          onTap: () => _state.setFilterCompletion(CompletionStatus.yes),
                         ),
                         const SizedBox(width: 8),
                         _SmallFilterChip(
                           label: 'Partial',
                           color: const Color(0xFFE7992D),
-                          isSelected: _filterCompletion == CompletionStatus.partially,
-                          onTap: () => _setCompletionFilter(CompletionStatus.partially),
+                          isSelected: _state.filterCompletion == CompletionStatus.partially,
+                          onTap: () => _state.setFilterCompletion(CompletionStatus.partially),
                         ),
                         const SizedBox(width: 8),
                         _SmallFilterChip(
                           label: 'No',
                           color: CupertinoColors.systemRed,
-                          isSelected: _filterCompletion == CompletionStatus.no,
-                          onTap: () => _setCompletionFilter(CompletionStatus.no),
+                          isSelected: _state.filterCompletion == CompletionStatus.no,
+                          onTap: () => _state.setFilterCompletion(CompletionStatus.no),
                         ),
                       ],
                     ),
@@ -166,10 +128,10 @@ class _SessionsTabState extends State<SessionsTab> {
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                itemCount: _sessions.length,
+                itemCount: _state.filteredSessions.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  return _SessionCard(session: _sessions[index]);
+                  return _SessionCard(session: _state.filteredSessions[index]);
                 },
               ),
             ),

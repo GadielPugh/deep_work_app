@@ -1,16 +1,37 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:deep_work/models/insights_data.dart';
+import 'package:deep_work/state/insights_page_state.dart';
 
-class InsightsTab extends StatelessWidget {
-  const InsightsTab({super.key, this.data});
+class InsightsTab extends StatefulWidget {
+  const InsightsTab({super.key});
 
-  /// Pass real values here later (ex: from DB).
-  final InsightsData? data;
+  @override
+  State<InsightsTab> createState() => _InsightsTabState();
+}
+
+class _InsightsTabState extends State<InsightsTab> {
+  final _state = InsightsPageState.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _state.addListener(_onStateChanged);
+    _state.load();
+  }
+
+  @override
+  void dispose() {
+    _state.removeListener(_onStateChanged);
+    super.dispose();
+  }
+
+  void _onStateChanged() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
-    final d = data ?? InsightsData.mock();
+    final d = _state.data;
 
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -138,86 +159,6 @@ class InsightsTab extends StatelessWidget {
       ),
     );
   }
-}
-
-class InsightsData {
-  const InsightsData({
-    required this.avgDailyFocusMinutes,
-    required this.successRatePercent,
-    required this.weeklyFocusMinutes,
-    required this.weekdayLabels,
-    required this.weeklyMaxY,
-    required this.focusByType,
-    required this.peakPerformanceTitle,
-    required this.peakPerformanceMessage,
-  });
-
-  final int avgDailyFocusMinutes;
-  final int successRatePercent;
-
-  /// Minutes per weekday.
-  final List<int> weeklyFocusMinutes;
-  final List<String> weekdayLabels;
-
-  /// Used to keep the chart stable while data changes.
-  final int weeklyMaxY;
-
-  final List<FocusTypeSegment> focusByType;
-
-  final String peakPerformanceTitle;
-  final String peakPerformanceMessage;
-
-  factory InsightsData.mock() {
-    return InsightsData(
-      avgDailyFocusMinutes: 101,
-      successRatePercent: 75,
-      weeklyFocusMinutes: const [120, 90, 150, 105, 135, 60, 45],
-      weekdayLabels: const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      weeklyMaxY: 160,
-      focusByType: const [
-        FocusTypeSegment(
-          label: 'Reading',
-          value: 8,
-          color: CupertinoColors.activeBlue,
-        ),
-        FocusTypeSegment(
-          label: 'Writing',
-          value: 5,
-          color: CupertinoColors.systemPurple,
-        ),
-        FocusTypeSegment(
-          label: 'Coding',
-          value: 6,
-          color: CupertinoColors.systemGreen,
-        ),
-        FocusTypeSegment(
-          label: 'Review',
-          value: 4,
-          color: Color(0xFFE6A23C),
-        ),
-        FocusTypeSegment(
-          label: 'Other',
-          value: 2,
-          color: CupertinoColors.systemGrey,
-        ),
-      ],
-      peakPerformanceTitle: 'Peak Performance',
-      peakPerformanceMessage:
-          'You focus best in the morning.\nConsider scheduling your most\nimportant work during this time.',
-    );
-  }
-}
-
-class FocusTypeSegment {
-  const FocusTypeSegment({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final int value;
-  final Color color;
 }
 
 class _Card extends StatelessWidget {
