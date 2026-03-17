@@ -1,14 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:deep_work/state/home_page_state.dart';
-import 'package:deep_work/ui/3_insights/insightsTab.dart';
-import 'package:deep_work/ui/2_history/historyTab.dart';
-import 'package:deep_work/ui/4_settings/settingsTab.dart';
-import 'package:deep_work/ui/1_principal_function/startSession.dart';
 import 'package:deep_work/state/sessions_state.dart';
+import 'package:deep_work/state/user_state.dart';
+import 'package:deep_work/ui/1_principal_function/startSession.dart';
+import 'package:deep_work/ui/2_history/historyTab.dart';
+import 'package:deep_work/ui/3_insights/insightsTab.dart';
+import 'package:deep_work/ui/4_settings/settingsTab.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SessionsState.instance.load();
+  await UserState.instance.load();
   runApp(const MyApp());
 }
 
@@ -144,6 +146,7 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   final _state = HomePageState.instance;
+  final _user = UserState.instance;
 
   @override
   void initState() {
@@ -162,6 +165,13 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final hour = now.hour;
+    final greeting = hour < 12
+        ? 'Good morning'
+        : (hour < 18 ? 'Good afternoon' : 'Good evening');
+    final name = _user.name.isEmpty ? 'there' : _user.name;
+
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text(
@@ -181,27 +191,23 @@ class _HomeTabState extends State<HomeTab> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  
+                children: [
                   Text(
-                    'Good morning, Gadiel',
-                    style: TextStyle(
+                    '$greeting, $name',
+                    style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
                       color: CupertinoColors.label,
                     ),
                   ),
-
-                  SizedBox(height: 5),
-
-                  Text(
+                  const SizedBox(height: 5),
+                  const Text(
                     'Ready for a deep work?',
                     style: TextStyle(
                       fontSize: 15,
                       color: CupertinoColors.secondaryLabel,
                     ),
                   ),
-
                 ],
               ),
             ),

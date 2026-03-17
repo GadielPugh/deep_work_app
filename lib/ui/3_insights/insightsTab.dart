@@ -303,9 +303,19 @@ class _WeeklyBarChartPainter extends CustomPainter {
 
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
 
-    const yTicks = [0, 40, 80, 120, 160];
+    final yTicks = <int>[];
+    const step = 40;
+    var tick = 0;
+    while (tick <= maxY && yTicks.length < 6) {
+      yTicks.add(tick);
+      tick += step;
+    }
+    if (yTicks.isEmpty) {
+      yTicks.add(0);
+    }
+
     for (final tick in yTicks) {
-      final t = tick / maxY;
+      final t = maxY == 0 ? 0.0 : (tick / maxY);
       final y = chartRect.bottom - (chartRect.height * t);
 
       canvas.drawLine(

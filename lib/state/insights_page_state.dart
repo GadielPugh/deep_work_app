@@ -79,9 +79,10 @@ class InsightsPageState extends ChangeNotifier {
     final weeklyMaxY = ((maxY / 40).ceil() * 40).clamp(40, 200);
 
     // Focus by type
+    // Focus by type (all-time)
     final byType = <SessionType, int>{};
     for (final t in SessionType.values) byType[t] = 0;
-    for (final s in weekSessions) {
+    for (final s in sessions) {
       byType[s.sessionType] = (byType[s.sessionType] ?? 0) + 1;
     }
     final colors = {

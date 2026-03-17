@@ -1,10 +1,43 @@
 import 'package:flutter/cupertino.dart';
+import 'package:deep_work/state/user_state.dart';
+import 'package:deep_work/ui/register/register_page.dart';
 
-class SettingsTab extends StatelessWidget {
+class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
 
   @override
+  State<SettingsTab> createState() => _SettingsTabState();
+}
+
+class _SettingsTabState extends State<SettingsTab> {
+  final _user = UserState.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _user.addListener(_onUserChanged);
+  }
+
+  @override
+  void dispose() {
+    _user.removeListener(_onUserChanged);
+    super.dispose();
+  }
+
+  void _onUserChanged() => setState(() {});
+
+  void _openProfileEditor(BuildContext context) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(builder: (_) => const RegisterPage()),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final initial = _user.initial;
+    final name = _user.name.isEmpty ? 'Your name' : _user.name;
+    final email = _user.email.isEmpty ? 'Add your email' : _user.email;
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       child: CustomScrollView(
@@ -17,11 +50,12 @@ class SettingsTab extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 6, 20, 28),
             sliver: SliverList(
               delegate: SliverChildListDelegate(
-                const [
+                [
                   _ProfileCard(
-                    initial: 'G',
-                    name: 'Gadiel',
-                    email: 'gadiel@example.com',
+                    initial: initial,
+                    name: name,
+                    email: email,
+                    onTap: _openProfileEditor,
                   ),
                   SizedBox(height: 16),
                   _SettingsGroupCard(
@@ -57,7 +91,7 @@ class SettingsTab extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 28),
-                  Center(
+                  const Center(
                     child: Text(
                       'Made with focus and intention',
                       style: TextStyle(
@@ -108,66 +142,72 @@ class _ProfileCard extends StatelessWidget {
     required this.initial,
     required this.name,
     required this.email,
+    required this.onTap,
   });
 
   final String initial;
   final String name;
   final String email;
+  final void Function(BuildContext context) onTap;
 
   @override
   Widget build(BuildContext context) {
-    return _Card(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            width: 62,
-            height: 62,
-            decoration: const BoxDecoration(
-              color: Color(0xFF3D5AFE),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              initial,
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: CupertinoColors.white,
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: () => onTap(context),
+      child: _Card(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 62,
+              height: 62,
+              decoration: const BoxDecoration(
+                color: Color(0xFF3D5AFE),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                initial,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: CupertinoColors.white,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: CupertinoColors.label,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: CupertinoColors.label,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  email,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: CupertinoColors.secondaryLabel,
+                  const SizedBox(height: 4),
+                  Text(
+                    email,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: CupertinoColors.secondaryLabel,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const Icon(
-            CupertinoIcons.chevron_forward,
-            size: 18,
-            color: CupertinoColors.tertiaryLabel,
-          ),
-        ],
+            const Icon(
+              CupertinoIcons.chevron_forward,
+              size: 18,
+              color: CupertinoColors.tertiaryLabel,
+            ),
+          ],
+        ),
       ),
     );
   }
