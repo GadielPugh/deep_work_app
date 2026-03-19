@@ -1,16 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:deep_work/state/home_page_state.dart';
 import 'package:deep_work/state/sessions_state.dart';
-import 'package:deep_work/state/user_state.dart';
 import 'package:deep_work/ui/1_principal_function/startSession.dart';
 import 'package:deep_work/ui/2_history/historyTab.dart';
 import 'package:deep_work/ui/3_insights/insightsTab.dart';
-import 'package:deep_work/ui/4_settings/settingsTab.dart';
+// TEMPORARILY DISABLED (v1): Settings tab is ignored for now.
+// import 'package:deep_work/ui/4_settings/settingsTab.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SessionsState.instance.load();
-  await UserState.instance.load();
+  // For future versions we can re-enable user profile loading here.
+  // await UserState.instance.load();
   runApp(const MyApp());
 }
 
@@ -57,10 +58,11 @@ class MainTabView extends StatelessWidget {
             icon: Icon(CupertinoIcons.chart_bar_alt_fill),
             label: 'Insights',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.settings),
-            label: 'Settings',
-          ),
+          // TEMPORARILY DISABLED (v1): Settings tab is ignored for now.
+          // BottomNavigationBarItem(
+          //   icon: Icon(CupertinoIcons.settings),
+          //   label: 'Settings',
+          // ),
         ],
       ),
       tabBuilder: (context, index) {
@@ -71,8 +73,6 @@ class MainTabView extends StatelessWidget {
             return const SessionsTab();
           case 2:
             return const InsightsTab();
-          case 3:
-            return const SettingsTab();
           default:
             return const HomeTab();
         }
@@ -146,7 +146,6 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   final _state = HomePageState.instance;
-  final _user = UserState.instance;
 
   @override
   void initState() {
@@ -165,12 +164,18 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    // FUTURE VERSION NOTE:
+    // We previously personalized greeting by time-of-day + user profile name.
+    
     final now = DateTime.now();
     final hour = now.hour;
     final greeting = hour < 12
         ? 'Good morning'
         : (hour < 18 ? 'Good afternoon' : 'Good evening');
-    final name = _user.name.isEmpty ? 'there' : _user.name;
+    // final name = _user.name.isEmpty ? 'there' : _user.name;
+    //
+    // For this version, keep it simple:
+    //const greetingText = 'Good morning';
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
@@ -193,7 +198,7 @@ class _HomeTabState extends State<HomeTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '$greeting, $name',
+                    greeting,
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
