@@ -146,11 +146,11 @@ class _InsightsTabState extends State<InsightsTab> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  _PeakPerformanceCard(
-                    title: d.peakPerformanceTitle,
-                    message: d.peakPerformanceMessage,
-                  ),
+                  // const SizedBox(height: 16),
+                  // _PeakPerformanceCard(
+                  //   title: d.peakPerformanceTitle,
+                  //   message: d.peakPerformanceMessage,
+                  // ),
                 ],
               ),
             ),
@@ -550,64 +550,64 @@ class _LegendRow extends StatelessWidget {
   }
 }
 
-class _PeakPerformanceCard extends StatelessWidget {
-  const _PeakPerformanceCard({required this.title, required this.message});
+// class _PeakPerformanceCard extends StatelessWidget {
+//   const _PeakPerformanceCard({required this.title, required this.message});
 
-  final String title;
-  final String message;
+//   final String title;
+//   final String message;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemBlue.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemBlue.withValues(alpha: 0.14),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              CupertinoIcons.lightbulb,
-              color: CupertinoColors.activeBlue,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: CupertinoColors.label,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  message,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    height: 1.35,
-                    color: CupertinoColors.secondaryLabel,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: const EdgeInsets.all(18),
+//       decoration: BoxDecoration(
+//         color: CupertinoColors.systemBlue.withValues(alpha: 0.10),
+//         borderRadius: BorderRadius.circular(20),
+//       ),
+//       child: Row(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Container(
+//             width: 44,
+//             height: 44,
+//             decoration: BoxDecoration(
+//               color: CupertinoColors.systemBlue.withValues(alpha: 0.14),
+//               shape: BoxShape.circle,
+//             ),
+//             child: const Icon(
+//               CupertinoIcons.lightbulb,
+//               color: CupertinoColors.activeBlue,
+//               size: 22,
+//             ),
+//           ),
+//           const SizedBox(width: 14),
+//           Expanded(
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   title,
+//                   style: const TextStyle(
+//                     fontSize: 18,
+//                     fontWeight: FontWeight.w800,
+//                     color: CupertinoColors.label,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 6),
+//                 Text(
+//                   message,
+//                   style: const TextStyle(
+//                     fontSize: 15,
+//                     height: 1.35,
+//                     color: CupertinoColors.secondaryLabel,
+//                     fontWeight: FontWeight.w600,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
