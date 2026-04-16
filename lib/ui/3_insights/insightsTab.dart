@@ -1,13 +1,17 @@
 // ignore_for_file: file_names
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 
 import 'package:deep_work/models/focus_category.dart';
+import 'package:deep_work/models/coach_feedback_entry.dart';
+import 'package:deep_work/models/coach_message_snapshot.dart';
 import 'package:deep_work/models/focus_coach_message.dart';
 import 'package:deep_work/models/insights_data.dart';
 import 'package:deep_work/services/analytics/focus_coach_message_service.dart';
+import 'package:deep_work/services/app_services.dart';
 import 'package:deep_work/state/categories_state.dart';
 import 'package:deep_work/state/insights_page_state.dart';
 import 'package:deep_work/state/sessions_state.dart';
@@ -26,6 +30,7 @@ class _InsightsTabState extends State<InsightsTab> {
   final _coachMessageService = const FocusCoachMessageService();
 
   bool _showDetails = false;
+  String? _lastSavedCoachSnapshotSignature;
 
   @override
   void initState() {
@@ -48,10 +53,17 @@ class _InsightsTabState extends State<InsightsTab> {
         !SessionsState.instance.isLoaded || !CategoriesState.instance.isLoaded;
     final data = _state.data;
     final categories = CategoriesState.instance.categories;
+    final now = DateTime.now();
     final coachMessage = _coachMessageService.buildMessage(
       data: data,
       categories: categories,
+      now: now,
     );
+    final coachSnapshot = CoachMessageSnapshot.fromMessage(coachMessage);
+
+    if (!isLoading) {
+      _scheduleCoachSnapshotSave(coachSnapshot);
+    }
 
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -79,6 +91,11 @@ class _InsightsTabState extends State<InsightsTab> {
                         ),
                         const SizedBox(height: 18),
                         _CoachCard(message: coachMessage),
+                        const SizedBox(height: 10),
+                        _CoachFeedbackBar(
+                          key: ValueKey(coachSnapshot.signature),
+                          message: coachMessage,
+                        ),
                         const SizedBox(height: 12),
                         _DetailsToggle(
                           expanded: _showDetails,
@@ -90,7 +107,11 @@ class _InsightsTabState extends State<InsightsTab> {
                         ),
                         if (_showDetails) ...[
                           const SizedBox(height: 12),
-                          _DetailsCard(data: data, categories: categories),
+                          _DetailsCard(
+                            data: data,
+                            categories: categories,
+                            coachMessageService: _coachMessageService,
+                          ),
                           if (data.debugInfo != null) ...[
                             const SizedBox(height: 12),
                             DevInsightsDebugSection(debugInfo: data.debugInfo!),
@@ -110,6 +131,27 @@ class _InsightsTabState extends State<InsightsTab> {
         ],
       ),
     );
+  }
+
+  void _scheduleCoachSnapshotSave(CoachMessageSnapshot snapshot) {
+    final signature = snapshot.signature;
+    if (_lastSavedCoachSnapshotSignature == signature) return;
+
+    _lastSavedCoachSnapshotSignature = signature;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_persistCoachSnapshot(snapshot));
+    });
+  }
+
+  Future<void> _persistCoachSnapshot(CoachMessageSnapshot snapshot) async {
+    try {
+      await AppServices.coachStorage.saveMessageSnapshot(snapshot);
+    } catch (_) {
+      if (_lastSavedCoachSnapshotSignature == snapshot.signature) {
+        _lastSavedCoachSnapshotSignature = null;
+      }
+      // Keep the coach UI resilient even if local persistence is unavailable.
+    }
   }
 }
 
@@ -247,6 +289,210 @@ class _CoachCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _CoachFeedbackBar extends StatefulWidget {
+  const _CoachFeedbackBar({super.key, required this.message});
+
+  final FocusCoachMessage message;
+
+  @override
+  State<_CoachFeedbackBar> createState() => _CoachFeedbackBarState();
+}
+
+class _CoachFeedbackBarState extends State<_CoachFeedbackBar> {
+  static const _notHelpfulReasons = [
+    'wrong time',
+    'wrong category',
+    'wrong duration',
+    'message unclear',
+    'not enough context',
+  ];
+
+  bool _isSaving = false;
+  bool? _wasHelpful;
+  String? _statusText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Was this helpful?',
+          style: TextStyle(
+            fontSize: 13,
+            color: CupertinoColors.secondaryLabel,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _FeedbackPillButton(
+              label: 'Helpful',
+              icon: CupertinoIcons.hand_thumbsup,
+              selected: _wasHelpful == true,
+              color: CupertinoColors.systemGreen,
+              onPressed: _isSaving || _wasHelpful != null
+                  ? null
+                  : _submitHelpful,
+            ),
+            const SizedBox(width: 10),
+            _FeedbackPillButton(
+              label: 'Not helpful',
+              icon: CupertinoIcons.hand_thumbsdown,
+              selected: _wasHelpful == false,
+              color: CupertinoColors.systemOrange,
+              onPressed: _isSaving || _wasHelpful != null
+                  ? null
+                  : _showNotHelpfulSheet,
+            ),
+          ],
+        ),
+        if (_statusText != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            _statusText!,
+            style: const TextStyle(
+              fontSize: 13.5,
+              color: CupertinoColors.secondaryLabel,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Future<void> _submitHelpful() async {
+    await _saveFeedback(wasHelpful: true);
+  }
+
+  Future<void> _showNotHelpfulSheet() async {
+    final selectedReason = await showCupertinoModalPopup<String>(
+      context: context,
+      builder: (context) {
+        return CupertinoActionSheet(
+          title: const Text('What felt off?'),
+          message: const Text('Pick the closest reason.'),
+          actions: [
+            for (final reason in _notHelpfulReasons)
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  Navigator.of(context).pop(reason);
+                },
+                child: Text(_sheetLabel(reason)),
+              ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            isDefaultAction: true,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || selectedReason == null) return;
+    await _saveFeedback(wasHelpful: false, optionalReason: selectedReason);
+  }
+
+  Future<void> _saveFeedback({
+    required bool wasHelpful,
+    String? optionalReason,
+  }) async {
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final entry = CoachFeedbackEntry.fromMessage(
+        message: widget.message,
+        wasHelpful: wasHelpful,
+        optionalReason: optionalReason,
+      );
+      await AppServices.coachStorage.saveFeedback(entry);
+
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+        _wasHelpful = wasHelpful;
+        _statusText = wasHelpful
+            ? 'Thanks. That helps.'
+            : 'Thanks. I\'ll use that to improve the coach.';
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+        _statusText = 'Feedback was not saved. Please try again.';
+      });
+    }
+  }
+
+  String _sheetLabel(String reason) {
+    if (reason.isEmpty) return reason;
+    return reason[0].toUpperCase() + reason.substring(1);
+  }
+}
+
+class _FeedbackPillButton extends StatelessWidget {
+  const _FeedbackPillButton({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.color,
+    required this.onPressed,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final Color color;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor = selected
+        ? color.withValues(alpha: 0.14)
+        : CupertinoColors.systemGrey6;
+    final foregroundColor = selected ? color : CupertinoColors.label;
+
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected
+                ? color.withValues(alpha: 0.35)
+                : CupertinoColors.systemGrey4,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: foregroundColor),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: foregroundColor,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -755,10 +1001,15 @@ class _LegendRow extends StatelessWidget {
 }
 
 class _DetailsCard extends StatelessWidget {
-  const _DetailsCard({required this.data, required this.categories});
+  const _DetailsCard({
+    required this.data,
+    required this.categories,
+    required this.coachMessageService,
+  });
 
   final InsightsData data;
   final List<FocusCategory> categories;
+  final FocusCoachMessageService coachMessageService;
 
   @override
   Widget build(BuildContext context) {
@@ -792,13 +1043,17 @@ class _DetailsCard extends StatelessWidget {
       for (final category in categories) category.id: category.name,
     };
 
-    if (data.predictionWarning != null) {
-      final warning = data.predictionWarning!;
+    final currentRecommendation = data.currentRecommendation;
+    if (currentRecommendation != null) {
+      final categoryName = currentRecommendation.categoryName.isNotEmpty
+          ? currentRecommendation.categoryName
+          : (categoryNames[currentRecommendation.categoryId] ??
+                currentRecommendation.categoryId);
       details.add(
         _CoachDetail(
-          label: 'Next step',
+          label: 'Try now',
           text:
-              'Try ${warning.recommendedDurationMinutes} minutes of ${warning.recommendedCategoryName}.',
+              '${currentRecommendation.recommendedDurationMinutes} minutes of $categoryName.',
         ),
       );
     }
@@ -809,33 +1064,53 @@ class _DetailsCard extends StatelessWidget {
             .toList()
           ..sort((a, b) => b.sampleCount.compareTo(a.sampleCount));
     if (trustedHours.isNotEmpty) {
-      final best = trustedHours.first;
+      final preferredCategoryId =
+          data.currentRecommendation?.categoryId ??
+          data.predictionWarning?.recommendedCategoryId;
+      var best = trustedHours.first;
+      if (preferredCategoryId != null) {
+        for (final candidate in trustedHours) {
+          if (candidate.categoryId == preferredCategoryId) {
+            best = candidate;
+            break;
+          }
+        }
+      }
       final categoryName = categoryNames[best.categoryId] ?? best.categoryId;
+      final timeBlockDescription = coachMessageService.describeTimeBlock(
+        best.bestHour,
+      );
       details.add(
         _CoachDetail(
-          label: 'Best time',
-          text:
-              '$categoryName looks strongest around ${_hourLabel(best.bestHour)}.',
+          label: 'Time block',
+          text: '$categoryName is usually stronger $timeBlockDescription.',
         ),
       );
     }
 
     if (data.recurringDistractionThemes.isNotEmpty) {
       final theme = data.recurringDistractionThemes.first;
-      details.add(
-        _CoachDetail(
-          label: 'Blocker',
-          text: '${_normalizeTheme(theme.theme)} came up in harder sessions.',
-        ),
-      );
+      if (theme.count >= 3) {
+        details.add(
+          _CoachDetail(
+            label: 'Blocker',
+            text:
+                'Recent reflections sometimes mention ${_normalizeTheme(theme.theme).toLowerCase()}.',
+          ),
+        );
+      }
     }
 
     final streaks = data.streaks;
     if (streaks != null && streaks.currentSuccessStreak > 0) {
+      final sessionWord = streaks.currentSuccessStreak == 1
+          ? 'session'
+          : 'sessions';
       details.add(
         _CoachDetail(
           label: 'Streak',
-          text: '${streaks.currentSuccessStreak} successful sessions in a row.',
+          text:
+              '${streaks.currentSuccessStreak} successful $sessionWord in a row.',
         ),
       );
     }
@@ -851,13 +1126,6 @@ class _DetailsCard extends StatelessWidget {
     }
 
     return details;
-  }
-
-  String _hourLabel(int hour) {
-    final normalizedHour = hour.clamp(0, 23);
-    final suffix = normalizedHour >= 12 ? 'PM' : 'AM';
-    final hourOfPeriod = normalizedHour % 12 == 0 ? 12 : normalizedHour % 12;
-    return '$hourOfPeriod $suffix';
   }
 
   String _normalizeTheme(String theme) {

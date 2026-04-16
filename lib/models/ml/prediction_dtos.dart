@@ -1,5 +1,23 @@
-/// Prediction-related DTOs consumed by the Flutter UI.
+// Prediction-related DTOs consumed by the Flutter UI.
 import 'package:deep_work/models/analytics/insight_confidence_dtos.dart';
+
+class CurrentFocusRecommendationDto {
+  const CurrentFocusRecommendationDto({
+    required this.categoryId,
+    required this.categoryName,
+    required this.recommendedDurationMinutes,
+    required this.successProbability,
+    required this.sampleCount,
+    this.isCautiousFallback = false,
+  });
+
+  final String categoryId;
+  final String categoryName;
+  final int recommendedDurationMinutes;
+  final double successProbability;
+  final int sampleCount;
+  final bool isCautiousFallback;
+}
 
 class PredictionWarningDto {
   const PredictionWarningDto({
@@ -13,9 +31,9 @@ class PredictionWarningDto {
     int? sampleCount,
     bool? isCautiousFallback,
     InsightConfidenceDto? confidence,
-  })  : _sampleCount = sampleCount,
-        _isCautiousFallback = isCautiousFallback,
-        _confidence = confidence;
+  }) : _sampleCount = sampleCount,
+       _isCautiousFallback = isCautiousFallback,
+       _confidence = confidence;
 
   /// Probability in the range [0..1].
   final double successProbability;
@@ -44,5 +62,6 @@ class PredictionWarningDto {
         reason: 'Not enough data yet.',
       );
 
-  String get successProbabilityLabel => '${(successProbability * 100).round()}%';
+  String get successProbabilityLabel =>
+      '${(successProbability * 100).round()}%';
 }

@@ -16,6 +16,7 @@ class InsightsData {
     required this.focusByType,
     required this.peakPerformanceTitle,
     required this.peakPerformanceMessage,
+    this.currentRecommendation,
     this.predictionWarning,
     InsightConfidenceDto? predictionWarningConfidence,
     this.distractionTrend,
@@ -35,6 +36,9 @@ class InsightsData {
   final List<FocusTypeSegment> focusByType;
   final String peakPerformanceTitle;
   final String peakPerformanceMessage;
+
+  /// Best category recommendation for the current hour.
+  final CurrentFocusRecommendationDto? currentRecommendation;
 
   /// Present only when the predictor estimates a low success probability.
   final PredictionWarningDto? predictionWarning;

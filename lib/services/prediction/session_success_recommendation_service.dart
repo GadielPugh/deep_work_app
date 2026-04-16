@@ -56,7 +56,7 @@ class SessionSuccessRecommendationService {
         categoryId: categories.first.id,
         categoryName: categories.first.name,
         successProbability: 0.5,
-        recommendedDurationMinutes: 30,
+        recommendedDurationMinutes: 25,
         riskFactors: const ['no history yet'],
         sampleCount: 0,
         isCautiousFallback: true,
@@ -64,49 +64,59 @@ class SessionSuccessRecommendationService {
     }
 
     final localNow = now.toLocal();
-    final rollingStart = localNow.subtract(Duration(days: featureEngineeringService.rollingWindowDays));
+    final rollingStart = localNow.subtract(
+      Duration(days: featureEngineeringService.rollingWindowDays),
+    );
 
-    // Compute a per-category ideal duration from rolling average.
-    double avgDurationForCategory(String categoryId) {
+    List<Session> sessionsInWindowForCategory(String categoryId) {
       final inWindow = sessions.where((s) {
         final local = s.dateTime.toLocal();
-        return local.isAfter(rollingStart) && local.isBefore(localNow) && s.categoryId == categoryId;
+        return local.isAfter(rollingStart) &&
+            local.isBefore(localNow) &&
+            s.categoryId == categoryId;
       }).toList();
+      return inWindow;
+    }
 
-      if (inWindow.isEmpty) return 30.0;
-      return inWindow.map((s) => s.durationMinutes).reduce((a, b) => a + b) / inWindow.length;
+    double avgSuccessfulDurationForCategory(String categoryId) {
+      final inWindow = sessionsInWindowForCategory(categoryId);
+      if (inWindow.isEmpty) return 25.0;
+
+      final successful = inWindow
+          .where((s) => s.outcome.name == 'yes')
+          .toList();
+      final source = successful.isNotEmpty ? successful : inWindow;
+      return source.map((s) => s.durationMinutes).reduce((a, b) => a + b) /
+          source.length;
+    }
+
+    int practicalDurationBucket(double durationMinutes) {
+      if (durationMinutes <= 15) return 10;
+      if (durationMinutes <= 22) return 20;
+      if (durationMinutes <= 27) return 25;
+      return 30;
     }
 
     int idealDurationMinutesForCategory(String categoryId) {
-      final avg = avgDurationForCategory(categoryId);
-      final rounded = (avg / 5).round() * 5; // step=5 minutes
-      return rounded.clamp(10, 180).toInt();
+      final avg = avgSuccessfulDurationForCategory(categoryId);
+      return practicalDurationBucket(avg);
     }
 
     int sampleCountForCategory(String categoryId) {
-      final inWindow = sessions.where((s) {
-        final local = s.dateTime.toLocal();
-        return local.isAfter(rollingStart) &&
-            local.isBefore(localNow) &&
-            s.categoryId == categoryId;
-      }).toList();
-      return inWindow.length;
+      return sessionsInWindowForCategory(categoryId).length;
     }
 
     bool hasZeroHistoricalSuccess(String categoryId) {
-      final inWindow = sessions.where((s) {
-        final local = s.dateTime.toLocal();
-        return local.isAfter(rollingStart) &&
-            local.isBefore(localNow) &&
-            s.categoryId == categoryId;
-      }).toList();
+      final inWindow = sessionsInWindowForCategory(categoryId);
       if (inWindow.isEmpty) return false;
       final yesCount = inWindow.where((s) => s.outcome.name == 'yes').length;
       return yesCount == 0;
     }
 
     bool allCategoriesPoor() {
-      final eligible = categories.where((c) => sampleCountForCategory(c.id) >= 3).toList();
+      final eligible = categories
+          .where((c) => sampleCountForCategory(c.id) >= 3)
+          .toList();
       if (eligible.isEmpty) return true;
       for (final c in eligible) {
         if (!hasZeroHistoricalSuccess(c.id)) return false;
@@ -132,10 +142,14 @@ class SessionSuccessRecommendationService {
         reflectionLength: 0,
       );
 
-      final prediction = predictor.predictSuccessProbability(features: candidateFeatures);
+      final prediction = predictor.predictSuccessProbability(
+        features: candidateFeatures,
+      );
       final isEligible = _confidenceService.isRecommendationCategoryEligible(
         sampleCount: sampleCount,
-        successProbability: hasZeroHistoricalSuccess(c.id) ? 0 : prediction.successProbability,
+        successProbability: hasZeroHistoricalSuccess(c.id)
+            ? 0
+            : prediction.successProbability,
         allCategoriesPoor: everyCategoryLooksPoor,
       );
       if (!isEligible) continue;
@@ -150,7 +164,8 @@ class SessionSuccessRecommendationService {
         isCautiousFallback: everyCategoryLooksPoor,
       );
 
-      if (best == null || recommendation.successProbability > best.successProbability) {
+      if (best == null ||
+          recommendation.successProbability > best.successProbability) {
         best = recommendation;
       }
     }
@@ -161,7 +176,10 @@ class SessionSuccessRecommendationService {
           categoryName: categories.first.name,
           successProbability: 0.5,
           recommendedDurationMinutes: 25,
-          riskFactors: const ['limited category history', 'patterns are not stable yet'],
+          riskFactors: const [
+            'limited category history',
+            'patterns are not stable yet',
+          ],
           sampleCount: 0,
           isCautiousFallback: true,
         );
@@ -178,9 +196,8 @@ class SessionSuccessRecommendationService {
   }) {
     final confidenceService = const InsightConfidenceService();
     final totalSessions = sessions.length;
-    final predictionConfidence = confidenceService.confidenceForPredictionWarning(
-      totalSessionCount: totalSessions,
-    );
+    final predictionConfidence = confidenceService
+        .confidenceForPredictionWarning(totalSessionCount: totalSessions);
 
     final best = recommendBestCategoryForCurrentHour(
       now: now,
@@ -197,19 +214,20 @@ class SessionSuccessRecommendationService {
     if (!isValidWarning) return null;
 
     final probLabel = best.successProbability * 100;
-    final themePart = (mostLikelyDistractionTheme != null &&
+    final themePart =
+        (mostLikelyDistractionTheme != null &&
             mostLikelyDistractionTheme.isNotEmpty)
         ? ' Recent failed sessions sometimes mention: $mostLikelyDistractionTheme.'
         : '';
 
     final message = best.isCautiousFallback
         ? 'Recent results look weak across categories, so this is only a cautious suggestion. '
-            'You could try ${best.categoryName} for ${best.recommendedDurationMinutes} minutes, '
-            'but confidence is limited.$themePart'
+              'You could try ${best.categoryName} for ${best.recommendedDurationMinutes} minutes, '
+              'but confidence is limited.$themePart'
         : 'Estimated success probability is about ${probLabel.round()}%. '
-            'You could try ${best.categoryName} for ${best.recommendedDurationMinutes} minutes'
-            '${predictionConfidence.level == InsightConfidenceLevel.medium ? ', but confidence is limited' : ''}.'
-            '$themePart';
+              'You could try ${best.categoryName} for ${best.recommendedDurationMinutes} minutes'
+              '${predictionConfidence.level == InsightConfidenceLevel.medium ? ', but confidence is limited' : ''}.'
+              '$themePart';
 
     return PredictionWarningDto(
       title: 'Low success risk',
@@ -230,4 +248,3 @@ class SessionSuccessRecommendationService {
     );
   }
 }
-

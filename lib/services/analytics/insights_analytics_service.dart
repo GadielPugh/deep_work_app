@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:deep_work/models/completion_status.dart';
 import 'package:deep_work/models/focus_category.dart';
 import 'package:deep_work/models/insights_data.dart';
+import 'package:deep_work/models/ml/prediction_dtos.dart';
 import 'package:deep_work/session_model.dart';
 
 import '../feature_engineering/focus_feature_engineering.dart';
@@ -29,23 +30,26 @@ class InsightsAnalyticsService {
     FocusAnalyticsService? focusAnalyticsService,
     SessionSuccessPredictor? predictor,
     SessionSuccessRecommendationService? recommendationService,
-  })  : _reflectionAnalyzerService = reflectionAnalyzerService ??
-            ReflectionAnalyzerService(
-              tagExtractor: tagExtractor ?? ReflectionTagExtractor(),
-            ),
-        _focusAnalyticsService = focusAnalyticsService ??
-            FocusAnalyticsService(
-              tagExtractor: tagExtractor ?? ReflectionTagExtractor(),
-            ),
-        _featureEngineeringService =
-            featureEngineeringService ?? FocusFeatureEngineeringService(),
-        _predictor = predictor ?? RuleBasedSessionSuccessPredictor(),
-        _recommendationService = recommendationService ??
-            SessionSuccessRecommendationService(
-              predictor: predictor ?? RuleBasedSessionSuccessPredictor(),
-              featureEngineeringService:
-                  featureEngineeringService ?? FocusFeatureEngineeringService(),
-            );
+  }) : _reflectionAnalyzerService =
+           reflectionAnalyzerService ??
+           ReflectionAnalyzerService(
+             tagExtractor: tagExtractor ?? ReflectionTagExtractor(),
+           ),
+       _focusAnalyticsService =
+           focusAnalyticsService ??
+           FocusAnalyticsService(
+             tagExtractor: tagExtractor ?? ReflectionTagExtractor(),
+           ),
+       _featureEngineeringService =
+           featureEngineeringService ?? FocusFeatureEngineeringService(),
+       _predictor = predictor ?? RuleBasedSessionSuccessPredictor(),
+       _recommendationService =
+           recommendationService ??
+           SessionSuccessRecommendationService(
+             predictor: predictor ?? RuleBasedSessionSuccessPredictor(),
+             featureEngineeringService:
+                 featureEngineeringService ?? FocusFeatureEngineeringService(),
+           );
 
   final ReflectionAnalyzerService _reflectionAnalyzerService;
   final FocusAnalyticsService _focusAnalyticsService;
@@ -67,7 +71,9 @@ class InsightsAnalyticsService {
 
     // ---- Existing UI fields (preserve behavior) ----
     final weekAgo = now.subtract(const Duration(days: 7));
-    final weekSessions = sessions.where((s) => s.dateTime.isAfter(weekAgo)).toList();
+    final weekSessions = sessions
+        .where((s) => s.dateTime.isAfter(weekAgo))
+        .toList();
 
     // Avg daily focus (last 7 days)
     final daysWithSessions = <DateTime>{};
@@ -81,7 +87,9 @@ class InsightsAnalyticsService {
     final avgDaily = (totalMinutes / days).round();
 
     // Success rate
-    final completed = weekSessions.where((s) => s.outcome == CompletionStatus.yes).length;
+    final completed = weekSessions
+        .where((s) => s.outcome == CompletionStatus.yes)
+        .length;
     final successRate = weekSessions.isEmpty
         ? 0
         : (completed * 100 / weekSessions.length).round();
@@ -157,26 +165,44 @@ class InsightsAnalyticsService {
       categories: categories,
     );
 
-    final recurringThemes = _reflectionAnalyzerService.extractRecurringDistractionThemes(
-      sessions: sessions,
-      distractionTags: ReflectionTagExtractor.defaultDistractionTags,
-      onlyFailures: true,
-      topN: 3,
-    ).where((theme) {
-      return insightConfidenceService.shouldShowLikelyCauseTheme(
-        themeCount: theme.count,
-      );
-    }).toList();
+    final recurringThemes = _reflectionAnalyzerService
+        .extractRecurringDistractionThemes(
+          sessions: sessions,
+          distractionTags: ReflectionTagExtractor.defaultDistractionTags,
+          onlyFailures: true,
+          topN: 3,
+        )
+        .where((theme) {
+          return insightConfidenceService.shouldShowLikelyCauseTheme(
+            themeCount: theme.count,
+          );
+        })
+        .toList();
 
     final topTheme = recurringThemes.isNotEmpty ? recurringThemes.first : null;
-
-    final predictionWarning = _recommendationService.getLowSuccessWarningIfNeeded(
-      now: now,
-      sessions: sessions,
-      categories: categories,
-      threshold: 0.45,
-      mostLikelyDistractionTheme: topTheme?.theme,
+    final bestRecommendation = _recommendationService
+        .recommendBestCategoryForCurrentHour(
+          now: now,
+          sessions: sessions,
+          categories: categories,
+        );
+    final currentRecommendation = CurrentFocusRecommendationDto(
+      categoryId: bestRecommendation.categoryId,
+      categoryName: bestRecommendation.categoryName,
+      recommendedDurationMinutes: bestRecommendation.recommendedDurationMinutes,
+      successProbability: bestRecommendation.successProbability,
+      sampleCount: bestRecommendation.sampleCount,
+      isCautiousFallback: bestRecommendation.isCautiousFallback,
     );
+
+    final predictionWarning = _recommendationService
+        .getLowSuccessWarningIfNeeded(
+          now: now,
+          sessions: sessions,
+          categories: categories,
+          threshold: 0.45,
+          mostLikelyDistractionTheme: topTheme?.theme,
+        );
 
     InsightsDebugInfoDto? debugInfo;
     if (includeDebugEvaluation) {
@@ -186,13 +212,6 @@ class InsightsAnalyticsService {
       );
 
       final evaluationSummary = evaluationService.evaluate(
-        sessions: sessions,
-        categories: categories,
-      );
-
-      final bestRecommendation = _recommendationService
-          .recommendBestCategoryForCurrentHour(
-        now: now,
         sessions: sessions,
         categories: categories,
       );
@@ -225,11 +244,12 @@ class InsightsAnalyticsService {
                 label: 'No data',
                 value: 0,
                 color: CupertinoColors.systemGrey,
-              )
+              ),
             ]
           : focusByType,
       peakPerformanceTitle: peakTitle,
       peakPerformanceMessage: peakMessage,
+      currentRecommendation: currentRecommendation,
       predictionWarning: predictionWarning,
       predictionWarningConfidence: predictionWarningConfidence,
       distractionTrend: analytics.distractionTrend,
@@ -252,4 +272,3 @@ class InsightsAnalyticsService {
     return ruleBrier <= baselineRollBrier && ruleBrier <= baselineGlobalBrier;
   }
 }
-

@@ -14,6 +14,9 @@ class FocusCoachMessage {
     required this.confidenceLabel,
     required this.type,
     this.reasonLine,
+    this.recommendedCategory,
+    this.recommendedDurationMinutes,
+    this.betterLaterHint,
   });
 
   final String title;
@@ -21,5 +24,8 @@ class FocusCoachMessage {
   final String actionText;
   final String confidenceLabel;
   final String? reasonLine;
+  final String? recommendedCategory;
+  final int? recommendedDurationMinutes;
+  final String? betterLaterHint;
   final FocusCoachMessageType type;
 }
