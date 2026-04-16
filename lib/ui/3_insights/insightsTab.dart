@@ -2,6 +2,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:deep_work/models/insights_data.dart';
+import 'package:deep_work/ui/3_insights/widgets/best_worst_hours_section.dart';
+import 'package:deep_work/ui/3_insights/widgets/category_success_duration_section.dart';
+import 'package:deep_work/ui/3_insights/widgets/distraction_trend_section.dart';
+import 'package:deep_work/ui/3_insights/widgets/prediction_warning_section.dart';
+import 'package:deep_work/ui/3_insights/widgets/recurring_distraction_themes_section.dart';
+import 'package:deep_work/ui/3_insights/widgets/streaks_summary_section.dart';
+import 'package:deep_work/ui/3_insights/widgets/dev_insights_debug_section.dart';
 import 'package:deep_work/state/insights_page_state.dart';
 
 class InsightsTab extends StatefulWidget {
@@ -146,11 +153,25 @@ class _InsightsTabState extends State<InsightsTab> {
                       ],
                     ),
                   ),
-                  // const SizedBox(height: 16),
-                  // _PeakPerformanceCard(
-                  //   title: d.peakPerformanceTitle,
-                  //   message: d.peakPerformanceMessage,
-                  // ),
+                  if (d.predictionWarning != null ||
+                      !d.predictionWarningConfidence.isTrusted) ...[
+                    const SizedBox(height: 16),
+                    PredictionWarningSection(data: d),
+                  ],
+                  const SizedBox(height: 16),
+                  BestWorstHoursSection(data: d),
+                  const SizedBox(height: 16),
+                  CategorySuccessDurationSection(data: d),
+                  const SizedBox(height: 16),
+                  DistractionTrendSection(data: d),
+                  const SizedBox(height: 16),
+                  RecurringDistractionThemesSection(data: d),
+                  const SizedBox(height: 16),
+                  StreaksSummarySection(data: d),
+                  if (d.debugInfo != null) ...[
+                    const SizedBox(height: 16),
+                    DevInsightsDebugSection(debugInfo: d.debugInfo!),
+                  ],
                 ],
               ),
             ),
