@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import 'package:deep_work/models/completion_status.dart';
-import 'package:deep_work/session_type.dart';
+import 'package:deep_work/models/focus_category.dart';
 import 'package:deep_work/state/sessions_state.dart';
 
 class SessionReflectionPage extends StatefulWidget {
@@ -9,14 +9,14 @@ class SessionReflectionPage extends StatefulWidget {
     super.key,
     required this.goal,
     required this.focusMinutes,
-    required this.sessionType,
+    required this.category,
     required this.startedAt,
     required this.stoppedAt,
   });
 
   final String goal;
   final int focusMinutes;
-  final SessionType sessionType;
+  final FocusCategory category;
   final DateTime startedAt;
   final DateTime stoppedAt;
 
@@ -42,7 +42,7 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
     // Event: save session → State Management → Storage Service
     await SessionsState.instance.saveSession(
       intention: widget.goal,
-      category: widget.sessionType.name,
+      category: widget.category.id,
       startedAt: widget.startedAt,
       stoppedAt: widget.stoppedAt,
       durationSeconds: durationSeconds,

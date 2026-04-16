@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:deep_work/models/completion_status.dart';
+import 'package:deep_work/models/focus_category.dart';
 import 'package:deep_work/models/insights_data.dart';
-import 'package:deep_work/session_type.dart';
+import 'package:deep_work/state/categories_state.dart';
 import 'package:deep_work/state/sessions_state.dart';
 
 /// State Management for the Insights page.
@@ -14,6 +15,7 @@ import 'package:deep_work/state/sessions_state.dart';
 class InsightsPageState extends ChangeNotifier {
   InsightsPageState._() {
     SessionsState.instance.addListener(_onSessionsChanged);
+    CategoriesState.instance.addListener(_onSessionsChanged);
   }
 
   static final InsightsPageState instance = InsightsPageState._();
@@ -29,9 +31,11 @@ class InsightsPageState extends ChangeNotifier {
   Future<void> load() async {
     if (!SessionsState.instance.isLoaded) {
       await SessionsState.instance.load();
-    } else {
-      _compute();
     }
+    if (!CategoriesState.instance.isLoaded) {
+      await CategoriesState.instance.load();
+    }
+    _compute();
   }
 
   void _compute() {
@@ -80,34 +84,35 @@ class InsightsPageState extends ChangeNotifier {
 
     // Focus by type
     // Focus by type (all-time)
-    final byType = <SessionType, int>{};
-    for (final t in SessionType.values) byType[t] = 0;
+    final byType = <String, int>{};
     for (final s in sessions) {
-      byType[s.sessionType] = (byType[s.sessionType] ?? 0) + 1;
+      byType[s.categoryId] = (byType[s.categoryId] ?? 0) + 1;
     }
-    final colors = {
-      SessionType.reading: CupertinoColors.activeBlue,
-      SessionType.writing: CupertinoColors.systemPurple,
-      SessionType.coding: CupertinoColors.systemGreen,
-      SessionType.review: const Color(0xFFE6A23C),
-      SessionType.work: CupertinoColors.systemOrange,
-      SessionType.other: CupertinoColors.systemGrey,
-    };
-    final typeLabels = {
-      SessionType.reading: 'Reading',
-      SessionType.writing: 'Writing',
-      SessionType.coding: 'Coding',
-      SessionType.review: 'Review',
-      SessionType.work: 'Work',
-      SessionType.other: 'Other',
-    };
+    final categories = CategoriesState.instance.categories;
+    const palette = <Color>[
+      CupertinoColors.activeBlue,
+      CupertinoColors.systemPurple,
+      CupertinoColors.systemGreen,
+      CupertinoColors.systemOrange,
+      CupertinoColors.systemPink,
+      CupertinoColors.systemTeal,
+      CupertinoColors.systemGrey,
+    ];
     final focusByType = <FocusTypeSegment>[];
+    var colorIndex = 0;
     for (final e in byType.entries) {
       if (e.value > 0) {
+        FocusCategory? category;
+        for (final c in categories) {
+          if (c.id == e.key) {
+            category = c;
+            break;
+          }
+        }
         focusByType.add(FocusTypeSegment(
-          label: typeLabels[e.key] ?? e.key.name,
+          label: category?.name ?? e.key,
           value: e.value,
-          color: colors[e.key] ?? CupertinoColors.systemGrey,
+          color: palette[colorIndex++ % palette.length],
         ));
       }
     }
@@ -136,5 +141,12 @@ class InsightsPageState extends ChangeNotifier {
       peakPerformanceMessage: peakMessage,
     );
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    SessionsState.instance.removeListener(_onSessionsChanged);
+    CategoriesState.instance.removeListener(_onSessionsChanged);
+    super.dispose();
   }
 }

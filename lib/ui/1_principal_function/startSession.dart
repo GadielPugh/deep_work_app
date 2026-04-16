@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:deep_work/models/focus_category.dart';
+import 'package:deep_work/state/categories_state.dart';
 import 'package:deep_work/ui/1_principal_function/processSession.dart';
-import 'package:deep_work/session_type.dart' as st;
 
 class StartSessionPage extends StatefulWidget {
   const StartSessionPage({super.key});
@@ -10,17 +11,49 @@ class StartSessionPage extends StatefulWidget {
 }
 
 class _StartSessionPageState extends State<StartSessionPage> {
-  st.SessionType _selectedType = st.SessionType.reading;
+  final _categoriesState = CategoriesState.instance;
+  String? _selectedCategoryId;
   final _goalController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _categoriesState.addListener(_onCategoriesChanged);
+    if (!_categoriesState.isLoaded) {
+      _categoriesState.load();
+    } else if (_categoriesState.categories.isNotEmpty) {
+      _selectedCategoryId = _categoriesState.categories.first.id;
+    }
+  }
+
+  @override
   void dispose() {
+    _categoriesState.removeListener(_onCategoriesChanged);
     _goalController.dispose();
     super.dispose();
   }
 
+  void _onCategoriesChanged() {
+    if (_selectedCategoryId == null && _categoriesState.categories.isNotEmpty) {
+      _selectedCategoryId = _categoriesState.categories.first.id;
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    final categories = _categoriesState.categories;
+    FocusCategory? selectedCategory;
+    if (_selectedCategoryId != null) {
+      for (final category in categories) {
+        if (category.id == _selectedCategoryId) {
+          selectedCategory = category;
+          break;
+        }
+      }
+    }
+    selectedCategory ??= categories.isNotEmpty ? categories.first : null;
+
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text(
@@ -67,11 +100,13 @@ class _StartSessionPageState extends State<StartSessionPage> {
               _buildSessionTypeSelector(),
               const SizedBox(height: 32),
               CupertinoButton.filled(
-                onPressed: () {
+                onPressed: selectedCategory == null
+                    ? null
+                    : () {
                   Navigator.of(context).push(
                     CupertinoPageRoute(
                       builder: (context) => ProcessSessionPage(
-                        sessionType: _selectedType,
+                        category: selectedCategory!,
                         goal: _goalController.text.trim().isEmpty ? null : _goalController.text.trim(),
                       ),
                     ),
@@ -87,45 +122,30 @@ class _StartSessionPageState extends State<StartSessionPage> {
   }
 
   Widget _buildSessionTypeSelector() {
-    return Column(
+    final categories = _categoriesState.categories;
+    if (categories.isEmpty) {
+      return const Text(
+        'Create at least one category in Home to start.',
+        style: TextStyle(color: CupertinoColors.secondaryLabel),
+      );
+    }
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
       children: [
-
-
-        Row(
-          children: [
-            Expanded(child: _sessionTypeButton(st.SessionType.reading, CupertinoIcons.book, 'Reading')),
-            const SizedBox(width: 12),
-            Expanded(child: _sessionTypeButton(st.SessionType.writing, CupertinoIcons.pencil, 'Writing')),
-            const SizedBox(width: 12),
-            Expanded(child: _sessionTypeButton(st.SessionType.coding, CupertinoIcons.chevron_left_slash_chevron_right, 'Coding')),
-          ],
-        ),
-
-
-
-        const SizedBox(height: 10),
-
-
-        Row(
-          children: [
-            Expanded(child: _sessionTypeButton(st.SessionType.review, CupertinoIcons.search, 'Review')),
-            const SizedBox(width: 12),
-            Expanded(child: _sessionTypeButton(st.SessionType.work, CupertinoIcons.hammer, 'Work')),
-            const SizedBox(width: 12),
-            Expanded(child: _sessionTypeButton(st.SessionType.other, CupertinoIcons.ellipsis, 'Other')),
-          ],
-        ),
-
-
-
+        for (final category in categories)
+          SizedBox(
+            width: (MediaQuery.of(context).size.width - 64) / 3,
+            child: _categoryButton(category),
+          ),
       ],
     );
   }
 
-  Widget _sessionTypeButton(st.SessionType type, IconData icon, String label) {
-    final isSelected = _selectedType == type;
+  Widget _categoryButton(FocusCategory category) {
+    final isSelected = _selectedCategoryId == category.id;
     return GestureDetector(
-      onTap: () => setState(() => _selectedType = type),
+      onTap: () => setState(() => _selectedCategoryId = category.id),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
@@ -153,7 +173,7 @@ class _StartSessionPageState extends State<StartSessionPage> {
         child: Column(
           children: [
             Icon(
-              icon,
+              category.icon,
               size: 28,
               color: isSelected
                   ? CupertinoColors.activeBlue
@@ -161,7 +181,7 @@ class _StartSessionPageState extends State<StartSessionPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              label,
+              category.name,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,

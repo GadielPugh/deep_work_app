@@ -1,6 +1,5 @@
 import 'package:deep_work/models/completion_status.dart';
 import 'package:deep_work/session_model.dart';
-import 'package:deep_work/session_type.dart';
 import 'package:deep_work/services/storage/session_storage_service.dart';
 
 /// In-memory mock storage for tests or development without a real DB.
@@ -12,7 +11,7 @@ class FakeSessionStorageService implements SessionStorageService {
       durationMinutes: 45,
       outcome: CompletionStatus.yes,
       dateTime: DateTime(2026, 2, 5, 9, 30),
-      sessionType: SessionType.reading,
+      categoryId: 'reading',
     ),
     Session(
       id: 2,
@@ -20,7 +19,7 @@ class FakeSessionStorageService implements SessionStorageService {
       durationMinutes: 30,
       outcome: CompletionStatus.partially,
       dateTime: DateTime(2026, 2, 5, 14, 15),
-      sessionType: SessionType.writing,
+      categoryId: 'writing',
     ),
   ];
   int _nextId = 3;
@@ -39,10 +38,6 @@ class FakeSessionStorageService implements SessionStorageService {
     required String outcome,
     String? reflection,
   }) async {
-    final type = SessionType.values.firstWhere(
-      (e) => e.name == category,
-      orElse: () => SessionType.other,
-    );
     final status = CompletionStatus.values.firstWhere(
       (e) => e.name == outcome,
       orElse: () => CompletionStatus.no,
@@ -54,7 +49,7 @@ class FakeSessionStorageService implements SessionStorageService {
       durationMinutes: durationSeconds ~/ 60,
       outcome: status,
       dateTime: startedAt,
-      sessionType: type,
+      categoryId: category,
       reflection: reflection,
       startedAt: startedAt,
       stoppedAt: stoppedAt,
@@ -72,7 +67,7 @@ class FakeSessionStorageService implements SessionStorageService {
       _sessions.map((s) => {
             'id': s.id,
             'intention': s.intention,
-            'category': s.sessionType.name,
+            'category': s.categoryId,
             'outcome': s.outcome.name,
             'reflection': s.reflection,
           }).toList();

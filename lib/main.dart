@@ -1,15 +1,18 @@
 import 'package:flutter/cupertino.dart';
+import 'package:deep_work/state/categories_state.dart';
 import 'package:deep_work/state/home_page_state.dart';
 import 'package:deep_work/state/sessions_state.dart';
 import 'package:deep_work/ui/1_principal_function/startSession.dart';
 import 'package:deep_work/ui/2_history/historyTab.dart';
 import 'package:deep_work/ui/3_insights/insightsTab.dart';
+import 'package:deep_work/ui/categories/manage_categories_page.dart';
 // TEMPORARILY DISABLED (v1): Settings tab is ignored for now.
 // import 'package:deep_work/ui/4_settings/settingsTab.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SessionsState.instance.load();
+  await CategoriesState.instance.load();
   // For future versions we can re-enable user profile loading here.
   // await UserState.instance.load();
   runApp(const MyApp());
@@ -178,12 +181,23 @@ class _HomeTabState extends State<HomeTab> {
     //const greetingText = 'Good morning';
 
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+      navigationBar: CupertinoNavigationBar(
         middle: Text(
           'DeepFocus',
           style: TextStyle(
             fontWeight: FontWeight.w600,
           ),
+        ),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            Navigator.of(context).push(
+              CupertinoPageRoute(
+                builder: (context) => const ManageCategoriesPage(),
+              ),
+            );
+          },
+          child: const Icon(CupertinoIcons.square_grid_2x2),
         ),
       ),
       child: SafeArea(

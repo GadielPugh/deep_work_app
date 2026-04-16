@@ -1,6 +1,5 @@
 import 'package:deep_work/models/completion_status.dart';
 import 'package:deep_work/session_model.dart';
-import 'package:deep_work/session_type.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'app_database.dart';
@@ -73,7 +72,7 @@ class SessionRepository {
   static Session _sessionFromRow(Map<String, dynamic> row) {
     final id = row['id'] as int?;
     final intention = row['intention'] as String;
-    final category = _categoryFromString(row['category'] as String);
+    final categoryId = (row['category'] as String?) ?? 'other';
     final startedMs = row['started_at_ms'] as int;
     final stoppedMs = row['stopped_at_ms'] as int;
     final durationSeconds = row['duration_seconds'] as int;
@@ -89,17 +88,10 @@ class SessionRepository {
       durationMinutes: durationSeconds ~/ 60,
       outcome: outcome,
       dateTime: startedAt,
-      sessionType: category,
+      categoryId: categoryId,
       reflection: reflection,
       startedAt: startedAt,
       stoppedAt: stoppedAt,
-    );
-  }
-
-  static SessionType _categoryFromString(String s) {
-    return SessionType.values.firstWhere(
-      (e) => e.name == s,
-      orElse: () => SessionType.other,
     );
   }
 

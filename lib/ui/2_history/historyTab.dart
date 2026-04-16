@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:deep_work/models/completion_status.dart';
+import 'package:deep_work/models/focus_category.dart';
 import 'package:deep_work/session_model.dart';
-import 'package:deep_work/session_type.dart';
+import 'package:deep_work/state/categories_state.dart';
 import 'package:deep_work/state/sessions_page_state.dart';
 
 class SessionsTab extends StatefulWidget {
@@ -14,6 +15,7 @@ class SessionsTab extends StatefulWidget {
 class _SessionsTabState extends State<SessionsTab> {
   final _searchController = TextEditingController();
   late final SessionsPageState _state;
+  final _categoriesState = CategoriesState.instance;
 
   @override
   void initState() {
@@ -21,12 +23,17 @@ class _SessionsTabState extends State<SessionsTab> {
     _state = SessionsPageState.instance;
     _searchController.addListener(() => _state.setSearch(_searchController.text));
     _state.addListener(_onStateChanged);
+    _categoriesState.addListener(_onStateChanged);
     _state.load();
+    if (!_categoriesState.isLoaded) {
+      _categoriesState.load();
+    }
   }
 
   @override
   void dispose() {
     _state.removeListener(_onStateChanged);
+    _categoriesState.removeListener(_onStateChanged);
     _searchController.dispose();
     super.dispose();
   }
@@ -35,6 +42,7 @@ class _SessionsTabState extends State<SessionsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final categories = _categoriesState.categories;
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Sessions', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -70,17 +78,17 @@ class _SessionsTabState extends State<SessionsTab> {
                       children: [
                         _FilterChip(
                           label: 'All',
-                          isSelected: _state.filterType == null,
-                          onTap: () => _state.setFilterType(null),
+                          isSelected: _state.filterCategoryId == null,
+                          onTap: () => _state.setFilterCategoryId(null),
                         ),
                         const SizedBox(width: 8),
-                        ...SessionType.values.map((type) => Padding(
+                        ...categories.map((category) => Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: _FilterChip(
-                                label: _sessionTypeLabel(type),
-                                icon: type.icon,
-                                isSelected: _state.filterType == type,
-                                onTap: () => _state.setFilterType(type),
+                                label: category.name,
+                                icon: category.icon,
+                                isSelected: _state.filterCategoryId == category.id,
+                                onTap: () => _state.setFilterCategoryId(category.id),
                               ),
                             )),
                       ],
@@ -131,7 +139,10 @@ class _SessionsTabState extends State<SessionsTab> {
                 itemCount: _state.filteredSessions.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  return _SessionCard(session: _state.filteredSessions[index]);
+                  return _SessionCard(
+                    session: _state.filteredSessions[index],
+                    categories: categories,
+                  );
                 },
               ),
             ),
@@ -141,22 +152,6 @@ class _SessionsTabState extends State<SessionsTab> {
     );
   }
 
-  String _sessionTypeLabel(SessionType type) {
-    switch (type) {
-      case SessionType.reading:
-        return 'Reading';
-      case SessionType.writing:
-        return 'Writing';
-      case SessionType.coding:
-        return 'Coding';
-      case SessionType.review:
-        return 'Review';
-      case SessionType.work:
-        return 'Work';
-      case SessionType.other:
-        return 'Other';
-    }
-  }
 }
 
 class _FilterChip extends StatelessWidget {
@@ -246,14 +241,25 @@ class _SmallFilterChip extends StatelessWidget {
 }
 
 class _SessionCard extends StatelessWidget {
-  const _SessionCard({required this.session});
+  const _SessionCard({
+    required this.session,
+    required this.categories,
+  });
 
   final Session session;
+  final List<FocusCategory> categories;
 
   @override
   Widget build(BuildContext context) {
     final outcomeIcon = _outcomeIcon(session.outcome);
     final outcomeColor = _outcomeColor(session.outcome);
+    FocusCategory? category;
+    for (final c in categories) {
+      if (c.id == session.categoryId) {
+        category = c;
+        break;
+      }
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -279,7 +285,7 @@ class _SessionCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              session.sessionType.icon,
+              category?.icon ?? CupertinoIcons.square_grid_2x2,
               size: 20,
               color: CupertinoColors.activeBlue,
             ),
@@ -300,6 +306,11 @@ class _SessionCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
+                    Text(
+                      category?.name ?? session.categoryId,
+                      style: const TextStyle(fontSize: 13, color: CupertinoColors.secondaryLabel),
+                    ),
+                    Text(' · ', style: TextStyle(fontSize: 13, color: CupertinoColors.secondaryLabel)),
                     Icon(CupertinoIcons.clock, size: 12, color: CupertinoColors.secondaryLabel),
                     const SizedBox(width: 4),
                     Text(

@@ -1,19 +1,18 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:deep_work/session_type.dart';
+import 'package:deep_work/models/focus_category.dart';
 import 'package:deep_work/ui/1_principal_function/sessionReflection.dart';
 
 class ProcessSessionPage extends StatefulWidget {
   ProcessSessionPage({
     super.key,
-    required this.sessionType,
+    required this.category,
     this.goal,
     DateTime? sessionStartedAt,
   }) : startedAt = sessionStartedAt ?? DateTime.now();
 
-  final SessionType sessionType;
+  final FocusCategory category;
   final String? goal;
   /// When this focus session was started (for DB and ML).
   final DateTime startedAt;
@@ -23,11 +22,11 @@ class ProcessSessionPage extends StatefulWidget {
 }
 
 class _ProcessSessionPageState extends State<ProcessSessionPage>
-    with SingleTickerProviderStateMixin {
-  int _elapsedSeconds = 0;
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   bool _isPaused = false;
-  Timer? _timer;
   late final AnimationController _ringController;
+  int _accumulatedMilliseconds = 0;
+  DateTime _runningStartedAt = DateTime.now();
 
   static const _ringStroke = 10.0;
   static const _ringSize = 220.0;
@@ -35,28 +34,33 @@ class _ProcessSessionPageState extends State<ProcessSessionPage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _ringController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
+      // Long loop to avoid visible hitch from frequent animation resets.
+      duration: const Duration(hours: 1),
     )..repeat();
-    _startTimer();
+    _runningStartedAt = DateTime.now();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _ringController.dispose();
     super.dispose();
   }
 
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!_isPaused) {
-        setState(() => _elapsedSeconds++);
-      }
-    });
+  int get _elapsedMilliseconds {
+    if (_isPaused) return _accumulatedMilliseconds;
+    final now = DateTime.now();
+    return _accumulatedMilliseconds +
+        now.difference(_runningStartedAt).inMilliseconds;
   }
+
+  int get _elapsedSeconds => _elapsedMilliseconds ~/ 1000;
+
+  double get _secondsIntoMinute =>
+      (_elapsedMilliseconds % 60000) / 1000.0;
 
   String get _formattedTime {
     final minutes = (_elapsedSeconds % 3600) ~/ 60;
@@ -64,14 +68,28 @@ class _ProcessSessionPageState extends State<ProcessSessionPage>
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Rebuild when returning so UI immediately reflects wall-clock elapsed time.
+    if (state == AppLifecycleState.resumed && mounted) {
+      setState(() {});
+      if (!_isPaused && !_ringController.isAnimating) {
+        _ringController.repeat();
+      }
+    }
+  }
+
+
   void _togglePause() {
     setState(() {
-      _isPaused = !_isPaused;
-      if (_isPaused) {
-        _timer?.cancel();
+      if (!_isPaused) {
+        // Capture running time before switching to paused state.
+        _accumulatedMilliseconds = _elapsedMilliseconds;
+        _isPaused = true;
         _ringController.stop();
       } else {
-        _startTimer();
+        _isPaused = false;
+        _runningStartedAt = DateTime.now();
         if (!_ringController.isAnimating) {
           _ringController.repeat();
         }
@@ -80,7 +98,6 @@ class _ProcessSessionPageState extends State<ProcessSessionPage>
   }
 
   void _stopSession() {
-    _timer?.cancel();
     _ringController.stop();
     final focusMinutes = _elapsedSeconds ~/ 60;
     final stoppedAt = DateTime.now();
@@ -89,7 +106,7 @@ class _ProcessSessionPageState extends State<ProcessSessionPage>
         builder: (context) => SessionReflectionPage(
           goal: widget.goal ?? 'No intention set',
           focusMinutes: focusMinutes,
-          sessionType: widget.sessionType,
+          category: widget.category,
           startedAt: widget.startedAt,
           stoppedAt: stoppedAt,
         ),
@@ -119,7 +136,7 @@ class _ProcessSessionPageState extends State<ProcessSessionPage>
                   ),
                 ),
                 child: Icon(
-                  widget.sessionType.icon,
+                  widget.category.icon,
                   size: 32,
                   color: CupertinoColors.activeBlue,
                 ),
@@ -132,10 +149,8 @@ class _ProcessSessionPageState extends State<ProcessSessionPage>
                 child: AnimatedBuilder(
                   animation: _ringController,
                   builder: (context, _) {
-                    final subSecond = _isPaused ? 0.0 : _ringController.value;
-                    final secondsIntoMinute = (_elapsedSeconds % 60) + subSecond;
                     final remainingFraction =
-                        ((60.0 - secondsIntoMinute) / 60.0).clamp(0.0, 1.0);
+                        ((60.0 - _secondsIntoMinute) / 60.0).clamp(0.0, 1.0);
 
                     return CustomPaint(
                       painter: _CountdownRingPainter(

@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import 'package:deep_work/models/completion_status.dart';
 import 'package:deep_work/session_model.dart';
-import 'package:deep_work/session_type.dart';
 import 'package:deep_work/state/sessions_state.dart';
 
 /// State Management for the History/Sessions page.
@@ -25,13 +24,13 @@ class SessionsPageState extends ChangeNotifier {
     _applyFilters();
   }
 
-  SessionType? _filterType;
+  String? _filterCategoryId;
   CompletionStatus? _filterCompletion;
   String _searchQuery = '';
 
   List<Session> _filteredSessions = [];
 
-  SessionType? get filterType => _filterType;
+  String? get filterCategoryId => _filterCategoryId;
   CompletionStatus? get filterCompletion => _filterCompletion;
   String get searchQuery => _searchQuery;
   List<Session> get filteredSessions => _filteredSessions;
@@ -46,8 +45,8 @@ class SessionsPageState extends ChangeNotifier {
   }
 
   /// Event: set session type filter
-  void setFilterType(SessionType? type) {
-    _filterType = type;
+  void setFilterCategoryId(String? categoryId) {
+    _filterCategoryId = categoryId;
     _applyFilters();
   }
 
@@ -68,7 +67,7 @@ class SessionsPageState extends ChangeNotifier {
     _filteredSessions = all.where((s) {
       final matchesSearch = _searchQuery.isEmpty ||
           s.intention.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesType = _filterType == null || s.sessionType == _filterType;
+      final matchesType = _filterCategoryId == null || s.categoryId == _filterCategoryId;
       final matchesCompletion = _filterCompletion == null || s.outcome == _filterCompletion;
       return matchesSearch && matchesType && matchesCompletion;
     }).toList();
