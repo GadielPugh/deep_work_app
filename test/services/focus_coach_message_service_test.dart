@@ -11,20 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const service = FocusCoachMessageService();
   final categories = [
-    FocusCategory(
-      id: 'coding',
-      name: 'Coding',
-      iconCodePoint: CupertinoIcons.chevron_left_slash_chevron_right.codePoint,
-      iconFontFamily: CupertinoIcons.iconFont,
-      iconFontPackage: CupertinoIcons.iconFontPackage,
-    ),
-    FocusCategory(
-      id: 'writing',
-      name: 'Writing',
-      iconCodePoint: CupertinoIcons.pencil.codePoint,
-      iconFontFamily: CupertinoIcons.iconFont,
-      iconFontPackage: CupertinoIcons.iconFontPackage,
-    ),
+    FocusCategory(id: 'coding', name: 'Coding', iconKey: 'code'),
+    FocusCategory(id: 'writing', name: 'Writing', iconKey: 'pencil'),
   ];
 
   group('FocusCoachMessageService', () {

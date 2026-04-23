@@ -60,6 +60,10 @@ class FocusCoachMessageService {
       historicalPattern: historicalPattern,
       nowHour: nowHour,
     );
+    final betterLaterTimeBlock =
+        betterLaterHint == null || historicalPattern == null
+        ? null
+        : timeBlockForHour(historicalPattern.bestHour);
     final durationText =
         'Try ${recommendation.recommendedDurationMinutes} min of $categoryName';
 
@@ -77,6 +81,7 @@ class FocusCoachMessageService {
         recommendedCategory: categoryName,
         recommendedDurationMinutes: recommendation.recommendedDurationMinutes,
         betterLaterHint: betterLaterHint,
+        betterLaterTimeBlock: betterLaterTimeBlock,
         type: FocusCoachMessageType.warning,
       );
     }

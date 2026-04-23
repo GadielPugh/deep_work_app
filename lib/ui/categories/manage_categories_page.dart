@@ -33,9 +33,7 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
 
   Future<void> _openForm({FocusCategory? editing}) async {
     final result = await Navigator.of(context).push<FocusCategory>(
-      CupertinoPageRoute(
-        builder: (_) => _CategoryFormPage(editing: editing),
-      ),
+      CupertinoPageRoute(builder: (_) => _CategoryFormPage(editing: editing)),
     );
     if (result == null) return;
     if (editing == null) {
@@ -126,7 +124,9 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
                   CupertinoButton(
                     padding: EdgeInsets.zero,
                     minSize: 28,
-                    onPressed: categories.length <= 1 ? null : () => _confirmDelete(c),
+                    onPressed: categories.length <= 1
+                        ? null
+                        : () => _confirmDelete(c),
                     child: const Icon(
                       CupertinoIcons.delete,
                       size: 20,
@@ -154,13 +154,13 @@ class _CategoryFormPage extends StatefulWidget {
 
 class _CategoryFormPageState extends State<_CategoryFormPage> {
   late final TextEditingController _nameController;
-  late IconData _selectedIcon;
+  late String _selectedIconKey;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.editing?.name ?? '');
-    _selectedIcon = widget.editing?.icon ?? CupertinoIcons.square_grid_2x2;
+    _selectedIconKey = widget.editing?.iconKey ?? 'ellipsis';
   }
 
   @override
@@ -174,12 +174,16 @@ class _CategoryFormPageState extends State<_CategoryFormPage> {
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
         .replaceAll(RegExp(r'^_+|_+$'), '');
-    return normalized.isEmpty ? 'category_${DateTime.now().millisecondsSinceEpoch}' : normalized;
+    return normalized.isEmpty
+        ? 'category_${DateTime.now().millisecondsSinceEpoch}'
+        : normalized;
   }
 
   String _uniqueIdFromName(String name) {
     final base = _normalizedId(name);
-    final existingIds = CategoriesState.instance.categories.map((c) => c.id).toSet();
+    final existingIds = CategoriesState.instance.categories
+        .map((c) => c.id)
+        .toSet();
     if (!existingIds.contains(base)) return base;
     var i = 2;
     while (existingIds.contains('${base}_$i')) {
@@ -189,11 +193,11 @@ class _CategoryFormPageState extends State<_CategoryFormPage> {
   }
 
   Future<void> _pickIcon() async {
-    final icon = await Navigator.of(context).push<IconData>(
-      CupertinoPageRoute(builder: (_) => const _IconPickerPage()),
-    );
-    if (icon == null) return;
-    setState(() => _selectedIcon = icon);
+    final iconKey = await Navigator.of(
+      context,
+    ).push<String>(CupertinoPageRoute(builder: (_) => const _IconPickerPage()));
+    if (iconKey == null) return;
+    setState(() => _selectedIconKey = iconKey);
   }
 
   void _save() {
@@ -203,9 +207,7 @@ class _CategoryFormPageState extends State<_CategoryFormPage> {
     final category = FocusCategory(
       id: editing?.id ?? _uniqueIdFromName(name),
       name: name,
-      iconCodePoint: _selectedIcon.codePoint,
-      iconFontFamily: _selectedIcon.fontFamily,
-      iconFontPackage: _selectedIcon.fontPackage,
+      iconKey: _selectedIconKey,
     );
     Navigator.of(context).pop(category);
   }
@@ -224,7 +226,10 @@ class _CategoryFormPageState extends State<_CategoryFormPage> {
             children: [
               const Text(
                 'Category name',
-                style: TextStyle(fontSize: 14, color: CupertinoColors.secondaryLabel),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: CupertinoColors.secondaryLabel,
+                ),
               ),
               const SizedBox(height: 8),
               CupertinoTextField(
@@ -235,20 +240,30 @@ class _CategoryFormPageState extends State<_CategoryFormPage> {
               const SizedBox(height: 16),
               const Text(
                 'Icon',
-                style: TextStyle(fontSize: 14, color: CupertinoColors.secondaryLabel),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: CupertinoColors.secondaryLabel,
+                ),
               ),
               const SizedBox(height: 8),
               GestureDetector(
                 onTap: _pickIcon,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: CupertinoColors.tertiarySystemFill,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
-                      Icon(_selectedIcon, size: 24, color: CupertinoColors.activeBlue),
+                      Icon(
+                        categoryIconOptionForKey(_selectedIconKey).icon,
+                        size: 24,
+                        color: CupertinoColors.activeBlue,
+                      ),
                       const SizedBox(width: 12),
                       const Text('Choose icon'),
                       const Spacer(),
@@ -284,7 +299,10 @@ class _IconPickerPageState extends State<_IconPickerPage> {
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(() => setState(() => _query = _searchController.text.trim().toLowerCase()));
+    _searchController.addListener(
+      () =>
+          setState(() => _query = _searchController.text.trim().toLowerCase()),
+    );
   }
 
   @override
@@ -301,9 +319,7 @@ class _IconPickerPageState extends State<_IconPickerPage> {
     }).toList();
 
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Pick Icon'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Pick Icon')),
       child: SafeArea(
         child: Column(
           children: [
@@ -327,7 +343,7 @@ class _IconPickerPageState extends State<_IconPickerPage> {
                 itemBuilder: (context, index) {
                   final item = items[index];
                   return GestureDetector(
-                    onTap: () => Navigator.of(context).pop(item.icon),
+                    onTap: () => Navigator.of(context).pop(item.key),
                     child: Container(
                       decoration: BoxDecoration(
                         color: CupertinoColors.tertiarySystemFill,

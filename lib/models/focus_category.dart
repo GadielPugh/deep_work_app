@@ -1,39 +1,25 @@
 import 'package:flutter/cupertino.dart';
 
+import 'package:deep_work/ui/categories/category_icon_catalog.dart';
+
 class FocusCategory {
   const FocusCategory({
     required this.id,
     required this.name,
-    required this.iconCodePoint,
-    this.iconFontFamily,
-    this.iconFontPackage,
+    required this.iconKey,
   });
 
   final String id;
   final String name;
-  final int iconCodePoint;
-  final String? iconFontFamily;
-  final String? iconFontPackage;
+  final String iconKey;
 
-  IconData get icon => IconData(
-        iconCodePoint,
-        fontFamily: iconFontFamily ?? CupertinoIcons.iconFont,
-        fontPackage: iconFontPackage,
-      );
+  IconData get icon => categoryIconOptionForKey(iconKey).icon;
 
-  FocusCategory copyWith({
-    String? id,
-    String? name,
-    int? iconCodePoint,
-    String? iconFontFamily,
-    String? iconFontPackage,
-  }) {
+  FocusCategory copyWith({String? id, String? name, String? iconKey}) {
     return FocusCategory(
       id: id ?? this.id,
       name: name ?? this.name,
-      iconCodePoint: iconCodePoint ?? this.iconCodePoint,
-      iconFontFamily: iconFontFamily ?? this.iconFontFamily,
-      iconFontPackage: iconFontPackage ?? this.iconFontPackage,
+      iconKey: iconKey ?? this.iconKey,
     );
   }
 }

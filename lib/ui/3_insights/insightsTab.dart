@@ -11,6 +11,7 @@ import 'package:deep_work/models/coach_message_snapshot.dart';
 import 'package:deep_work/models/focus_coach_message.dart';
 import 'package:deep_work/models/insights_data.dart';
 import 'package:deep_work/services/analytics/focus_coach_message_service.dart';
+import 'package:deep_work/services/analytics/focus_coach_refresh_policy.dart';
 import 'package:deep_work/services/app_services.dart';
 import 'package:deep_work/state/categories_state.dart';
 import 'package:deep_work/state/insights_page_state.dart';
@@ -25,27 +26,50 @@ class InsightsTab extends StatefulWidget {
   State<InsightsTab> createState() => _InsightsTabState();
 }
 
-class _InsightsTabState extends State<InsightsTab> {
+class _InsightsTabState extends State<InsightsTab> with WidgetsBindingObserver {
   final _state = InsightsPageState.instance;
   final _coachMessageService = const FocusCoachMessageService();
+  final _coachRefreshPolicy = const FocusCoachRefreshPolicy();
 
   bool _showDetails = false;
   String? _lastSavedCoachSnapshotSignature;
+  FocusCoachVisibleState? _visibleCoachState;
+  DateTime? _lastCoachComputedAt;
+  Timer? _timeBoundaryTimer;
+  bool _hasHandledInitialCoachLoad = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _state.addListener(_onStateChanged);
     _state.load();
+    _scheduleTimeBoundaryCheck();
   }
 
   @override
   void dispose() {
+    _timeBoundaryTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _state.removeListener(_onStateChanged);
     super.dispose();
   }
 
-  void _onStateChanged() => setState(() {});
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshVisibleCoach(trigger: FocusCoachRefreshTrigger.appResumed);
+      _scheduleTimeBoundaryCheck();
+    }
+  }
+
+  void _onStateChanged() {
+    final trigger = _hasHandledInitialCoachLoad
+        ? FocusCoachRefreshTrigger.sessionDataChanged
+        : FocusCoachRefreshTrigger.pageOpened;
+    _hasHandledInitialCoachLoad = true;
+    _refreshVisibleCoach(trigger: trigger);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,16 +78,14 @@ class _InsightsTabState extends State<InsightsTab> {
     final data = _state.data;
     final categories = CategoriesState.instance.categories;
     final now = DateTime.now();
-    final coachMessage = _coachMessageService.buildMessage(
-      data: data,
-      categories: categories,
-      now: now,
-    );
-    final coachSnapshot = CoachMessageSnapshot.fromMessage(coachMessage);
-
-    if (!isLoading) {
-      _scheduleCoachSnapshotSave(coachSnapshot);
-    }
+    final visibleMessage =
+        _visibleCoachState?.message ??
+        _coachMessageService.buildMessage(
+          data: data,
+          categories: categories,
+          now: now,
+        );
+    final coachSnapshot = CoachMessageSnapshot.fromMessage(visibleMessage);
 
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -90,11 +112,11 @@ class _InsightsTabState extends State<InsightsTab> {
                           ),
                         ),
                         const SizedBox(height: 18),
-                        _CoachCard(message: coachMessage),
+                        _CoachCard(message: visibleMessage),
                         const SizedBox(height: 10),
                         _CoachFeedbackBar(
                           key: ValueKey(coachSnapshot.signature),
-                          message: coachMessage,
+                          message: visibleMessage,
                         ),
                         const SizedBox(height: 12),
                         _DetailsToggle(
@@ -111,6 +133,7 @@ class _InsightsTabState extends State<InsightsTab> {
                             data: data,
                             categories: categories,
                             coachMessageService: _coachMessageService,
+                            visibleMessage: visibleMessage,
                           ),
                           if (data.debugInfo != null) ...[
                             const SizedBox(height: 12),
@@ -133,14 +156,78 @@ class _InsightsTabState extends State<InsightsTab> {
     );
   }
 
-  void _scheduleCoachSnapshotSave(CoachMessageSnapshot snapshot) {
+  void _refreshVisibleCoach({required FocusCoachRefreshTrigger trigger}) {
+    final isLoading =
+        !SessionsState.instance.isLoaded || !CategoriesState.instance.isLoaded;
+    if (isLoading) {
+      if (mounted) {
+        setState(() {});
+      }
+      return;
+    }
+
+    final now = DateTime.now();
+    if (!_coachRefreshPolicy.shouldRecompute(
+      trigger: trigger,
+      lastComputedAt: _lastCoachComputedAt,
+      now: now,
+    )) {
+      if (mounted) {
+        setState(() {});
+      }
+      return;
+    }
+
+    _lastCoachComputedAt = now;
+    final candidate = _coachMessageService.buildMessage(
+      data: _state.data,
+      categories: CategoriesState.instance.categories,
+      now: now,
+    );
+    final decision = _coachRefreshPolicy.decideReplacement(
+      currentVisible: _visibleCoachState,
+      candidate: candidate,
+      now: now,
+    );
+
+    if (decision.shouldReplaceVisible) {
+      _visibleCoachState = _coachRefreshPolicy.createVisibleState(
+        message: candidate,
+        shownAt: now,
+      );
+      _persistVisibleCoachSnapshot(candidate);
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _scheduleTimeBoundaryCheck() {
+    _timeBoundaryTimer?.cancel();
+    final now = DateTime.now();
+    final nextBoundary = _coachRefreshPolicy.nextRefreshBoundary(now);
+    final delay = nextBoundary.difference(now) + const Duration(seconds: 1);
+
+    _timeBoundaryTimer = Timer(delay, () {
+      final trigger = _coachRefreshPolicy.timeBasedTrigger(
+        lastComputedAt: _lastCoachComputedAt,
+        now: DateTime.now(),
+      );
+      if (trigger != null) {
+        _refreshVisibleCoach(trigger: trigger);
+      }
+      _scheduleTimeBoundaryCheck();
+    });
+  }
+
+  void _persistVisibleCoachSnapshot(FocusCoachMessage message) {
+    final snapshot = CoachMessageSnapshot.fromMessage(message);
     final signature = snapshot.signature;
     if (_lastSavedCoachSnapshotSignature == signature) return;
 
     _lastSavedCoachSnapshotSignature = signature;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_persistCoachSnapshot(snapshot));
-    });
+    unawaited(_persistCoachSnapshot(snapshot));
   }
 
   Future<void> _persistCoachSnapshot(CoachMessageSnapshot snapshot) async {
@@ -1005,11 +1092,13 @@ class _DetailsCard extends StatelessWidget {
     required this.data,
     required this.categories,
     required this.coachMessageService,
+    required this.visibleMessage,
   });
 
   final InsightsData data;
   final List<FocusCategory> categories;
   final FocusCoachMessageService coachMessageService;
+  final FocusCoachMessage visibleMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -1042,9 +1131,26 @@ class _DetailsCard extends StatelessWidget {
     final categoryNames = {
       for (final category in categories) category.id: category.name,
     };
+    final categoryIdsByName = {
+      for (final category in categories)
+        category.name.toLowerCase(): category.id,
+    };
 
     final currentRecommendation = data.currentRecommendation;
-    if (currentRecommendation != null) {
+    final visibleCategoryName = visibleMessage.recommendedCategory;
+    final visibleDuration = visibleMessage.recommendedDurationMinutes;
+    final visibleCategoryId = visibleCategoryName == null
+        ? null
+        : categoryIdsByName[visibleCategoryName.toLowerCase()];
+
+    if (visibleCategoryName != null && visibleDuration != null) {
+      details.add(
+        _CoachDetail(
+          label: 'Try now',
+          text: '$visibleDuration minutes of $visibleCategoryName.',
+        ),
+      );
+    } else if (currentRecommendation != null) {
       final categoryName = currentRecommendation.categoryName.isNotEmpty
           ? currentRecommendation.categoryName
           : (categoryNames[currentRecommendation.categoryId] ??
@@ -1065,6 +1171,7 @@ class _DetailsCard extends StatelessWidget {
           ..sort((a, b) => b.sampleCount.compareTo(a.sampleCount));
     if (trustedHours.isNotEmpty) {
       final preferredCategoryId =
+          visibleCategoryId ??
           data.currentRecommendation?.categoryId ??
           data.predictionWarning?.recommendedCategoryId;
       var best = trustedHours.first;

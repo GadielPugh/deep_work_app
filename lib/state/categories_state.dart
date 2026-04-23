@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:deep_work/models/focus_category.dart';
+import 'package:deep_work/ui/categories/category_icon_catalog.dart';
 
 class CategoriesState extends ChangeNotifier {
   CategoriesState._();
@@ -61,7 +62,9 @@ class CategoriesState extends ChangeNotifier {
   }
 
   Future<void> updateCategory(FocusCategory category) async {
-    _categories = _categories.map((c) => c.id == category.id ? category : c).toList();
+    _categories = _categories
+        .map((c) => c.id == category.id ? category : c)
+        .toList();
     notifyListeners();
     await _persist();
   }
@@ -82,67 +85,26 @@ class CategoriesState extends ChangeNotifier {
   }
 
   static Map<String, dynamic> _toJson(FocusCategory c) {
-    return {
-      'id': c.id,
-      'name': c.name,
-      'iconCodePoint': c.iconCodePoint,
-      'iconFontFamily': c.iconFontFamily,
-      'iconFontPackage': c.iconFontPackage,
-    };
+    return {'id': c.id, 'name': c.name, 'iconKey': c.iconKey};
   }
 
   static FocusCategory _fromJson(Map<String, dynamic> json) {
     return FocusCategory(
       id: (json['id'] ?? '').toString(),
       name: (json['name'] ?? '').toString(),
-      iconCodePoint: (json['iconCodePoint'] as num?)?.toInt() ?? CupertinoIcons.square.codePoint,
-      iconFontFamily: json['iconFontFamily']?.toString(),
-      iconFontPackage: json['iconFontPackage']?.toString(),
+      iconKey: categoryIconKeyFromLegacy(
+        iconKey: json['iconKey']?.toString(),
+        iconCodePoint: (json['iconCodePoint'] as num?)?.toInt(),
+      ),
     );
   }
 
   static final List<FocusCategory> _defaultCategories = [
-    FocusCategory(
-      id: 'reading',
-      name: 'Reading',
-      iconCodePoint: CupertinoIcons.book.codePoint,
-      iconFontFamily: CupertinoIcons.iconFont,
-      iconFontPackage: CupertinoIcons.iconFontPackage,
-    ),
-    FocusCategory(
-      id: 'writing',
-      name: 'Writing',
-      iconCodePoint: CupertinoIcons.pencil.codePoint,
-      iconFontFamily: CupertinoIcons.iconFont,
-      iconFontPackage: CupertinoIcons.iconFontPackage,
-    ),
-    FocusCategory(
-      id: 'coding',
-      name: 'Coding',
-      iconCodePoint: CupertinoIcons.chevron_left_slash_chevron_right.codePoint,
-      iconFontFamily: CupertinoIcons.iconFont,
-      iconFontPackage: CupertinoIcons.iconFontPackage,
-    ),
-    FocusCategory(
-      id: 'review',
-      name: 'Review',
-      iconCodePoint: CupertinoIcons.search.codePoint,
-      iconFontFamily: CupertinoIcons.iconFont,
-      iconFontPackage: CupertinoIcons.iconFontPackage,
-    ),
-    FocusCategory(
-      id: 'work',
-      name: 'Work',
-      iconCodePoint: CupertinoIcons.hammer.codePoint,
-      iconFontFamily: CupertinoIcons.iconFont,
-      iconFontPackage: CupertinoIcons.iconFontPackage,
-    ),
-    FocusCategory(
-      id: 'other',
-      name: 'Other',
-      iconCodePoint: CupertinoIcons.ellipsis.codePoint,
-      iconFontFamily: CupertinoIcons.iconFont,
-      iconFontPackage: CupertinoIcons.iconFontPackage,
-    ),
+    FocusCategory(id: 'reading', name: 'Reading', iconKey: 'book'),
+    FocusCategory(id: 'writing', name: 'Writing', iconKey: 'pencil'),
+    FocusCategory(id: 'coding', name: 'Coding', iconKey: 'code'),
+    FocusCategory(id: 'review', name: 'Review', iconKey: 'search'),
+    FocusCategory(id: 'work', name: 'Work', iconKey: 'hammer'),
+    FocusCategory(id: 'other', name: 'Other', iconKey: 'ellipsis'),
   ];
 }

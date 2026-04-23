@@ -17,6 +17,7 @@ class FocusCoachMessage {
     this.recommendedCategory,
     this.recommendedDurationMinutes,
     this.betterLaterHint,
+    this.betterLaterTimeBlock,
   });
 
   final String title;
@@ -27,5 +28,11 @@ class FocusCoachMessage {
   final String? recommendedCategory;
   final int? recommendedDurationMinutes;
   final String? betterLaterHint;
+  final String? betterLaterTimeBlock;
   final FocusCoachMessageType type;
+
+  bool get isActionable =>
+      type == FocusCoachMessageType.warning ||
+      type == FocusCoachMessageType.suggestion ||
+      type == FocusCoachMessageType.positive;
 }

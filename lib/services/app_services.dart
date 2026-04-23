@@ -1,6 +1,6 @@
-import 'package:deep_work/services/storage/local_session_storage_service.dart';
 import 'package:deep_work/services/storage/local_coach_storage_service.dart';
 import 'package:deep_work/services/storage/session_storage_service.dart';
+import 'package:deep_work/services/storage/session_storage_service_factory.dart';
 
 /// Central place for app-wide services.
 ///
@@ -8,6 +8,6 @@ import 'package:deep_work/services/storage/session_storage_service.dart';
 final class AppServices {
   AppServices._();
 
-  static SessionStorageService sessionStorage = LocalSessionStorageService();
+  static SessionStorageService sessionStorage = createSessionStorageService();
   static LocalCoachStorageService coachStorage = LocalCoachStorageService();
 }
