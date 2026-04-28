@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:deep_work/models/insights_data.dart';
+import 'package:deep_work/services/app_services.dart';
 import 'package:deep_work/state/categories_state.dart';
 import 'package:deep_work/state/sessions_state.dart';
 import 'package:deep_work/services/analytics/insights_analytics_service.dart';
@@ -18,7 +19,10 @@ class InsightsPageState extends ChangeNotifier {
 
   static final InsightsPageState instance = InsightsPageState._();
 
-  final InsightsAnalyticsService _analyticsService = InsightsAnalyticsService();
+  final InsightsAnalyticsService _analyticsService = InsightsAnalyticsService(
+    predictor: AppServices.sessionSuccessPredictor,
+    personalizationProfileService: AppServices.personalizationProfileService,
+  );
 
   void _onSessionsChanged() {
     _compute();
@@ -35,11 +39,17 @@ class InsightsPageState extends ChangeNotifier {
     if (!CategoriesState.instance.isLoaded) {
       await CategoriesState.instance.load();
     }
+    await AppServices.personalizationProfileService.load();
+    await AppServices.personalizationProfileService
+        .bootstrapFromSessionsIfEmpty(SessionsState.instance.sessions);
     _compute();
   }
 
   void _compute() {
-    if (!SessionsState.instance.isLoaded || !CategoriesState.instance.isLoaded) return;
+    if (!SessionsState.instance.isLoaded ||
+        !CategoriesState.instance.isLoaded) {
+      return;
+    }
 
     final sessions = SessionsState.instance.sessions;
     final categories = CategoriesState.instance.categories;

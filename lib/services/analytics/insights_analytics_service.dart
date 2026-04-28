@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
+import 'package:deep_work/models/analytics/insight_confidence_dtos.dart';
 import 'package:deep_work/models/completion_status.dart';
 import 'package:deep_work/models/focus_category.dart';
 import 'package:deep_work/models/insights_data.dart';
@@ -7,6 +8,8 @@ import 'package:deep_work/models/ml/prediction_dtos.dart';
 import 'package:deep_work/session_model.dart';
 
 import '../feature_engineering/focus_feature_engineering.dart';
+import '../personalization/local_personalization_profile_service.dart';
+import '../personalization/personalized_recommendation_service.dart';
 import '../prediction/rule_based_success_predictor.dart';
 import '../prediction/predictor_evaluation_service.dart';
 import '../prediction/session_success_recommendation_service.dart';
@@ -30,6 +33,7 @@ class InsightsAnalyticsService {
     FocusAnalyticsService? focusAnalyticsService,
     SessionSuccessPredictor? predictor,
     SessionSuccessRecommendationService? recommendationService,
+    LocalPersonalizationProfileService? personalizationProfileService,
   }) : _reflectionAnalyzerService =
            reflectionAnalyzerService ??
            ReflectionAnalyzerService(
@@ -49,6 +53,14 @@ class InsightsAnalyticsService {
              predictor: predictor ?? RuleBasedSessionSuccessPredictor(),
              featureEngineeringService:
                  featureEngineeringService ?? FocusFeatureEngineeringService(),
+             personalizationProfileProvider:
+                 personalizationProfileService == null
+                 ? null
+                 : () => personalizationProfileService.profile,
+             personalizedRecommendationService:
+                 personalizationProfileService == null
+                 ? null
+                 : const PersonalizedRecommendationService(),
            );
 
   final ReflectionAnalyzerService _reflectionAnalyzerService;
@@ -63,11 +75,17 @@ class InsightsAnalyticsService {
     required DateTime now,
     bool includeDebugEvaluation = false,
   }) {
-    if (sessions.isEmpty) return InsightsData.empty();
-
     final insightConfidenceService = const InsightConfidenceService();
     final predictionWarningConfidence = insightConfidenceService
         .confidenceForPredictionWarning(totalSessionCount: sessions.length);
+
+    if (sessions.isEmpty) {
+      return _emptyInsightsData(
+        categories: categories,
+        now: now,
+        predictionWarningConfidence: predictionWarningConfidence,
+      );
+    }
 
     // ---- Existing UI fields (preserve behavior) ----
     final weekAgo = now.subtract(const Duration(days: 7));
@@ -259,6 +277,45 @@ class InsightsAnalyticsService {
       successRateByCategory: analytics.successRateByCategory,
       avgDurationByCategory: analytics.avgDurationByCategory,
       debugInfo: debugInfo,
+    );
+  }
+
+  InsightsData _emptyInsightsData({
+    required List<FocusCategory> categories,
+    required DateTime now,
+    required InsightConfidenceDto predictionWarningConfidence,
+  }) {
+    if (categories.isEmpty) {
+      return InsightsData.empty();
+    }
+
+    final bestRecommendation = _recommendationService
+        .recommendBestCategoryForCurrentHour(
+          now: now,
+          sessions: const [],
+          categories: categories,
+        );
+
+    return InsightsData(
+      avgDailyFocusMinutes: 0,
+      successRatePercent: 0,
+      weeklyFocusMinutes: const [0, 0, 0, 0, 0, 0, 0],
+      weekdayLabels: const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      weeklyMaxY: 60,
+      focusByType: const [],
+      peakPerformanceTitle: 'Peak Performance',
+      peakPerformanceMessage:
+          'Complete focus sessions to see insights about your productivity patterns.',
+      currentRecommendation: CurrentFocusRecommendationDto(
+        categoryId: bestRecommendation.categoryId,
+        categoryName: bestRecommendation.categoryName,
+        recommendedDurationMinutes:
+            bestRecommendation.recommendedDurationMinutes,
+        successProbability: bestRecommendation.successProbability,
+        sampleCount: bestRecommendation.sampleCount,
+        isCautiousFallback: bestRecommendation.isCautiousFallback,
+      ),
+      predictionWarningConfidence: predictionWarningConfidence,
     );
   }
 

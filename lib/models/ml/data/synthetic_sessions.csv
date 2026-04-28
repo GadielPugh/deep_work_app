@@ -1,0 +1,203 @@
+session_id,intention,category,started_at_ms,stopped_at_ms,duration_seconds,outcome,reflection,created_at_ms
+1,Write unit tests,Coding,1767265800000,1767267000000,1200,yes,good energy today; good rhythm,1767267420000
+2,Prepare summary,Writing,1767358800000,1767360300000,1500,yes,good flow while writing,1767360900000
+3,Build export pipeline,Coding,1767354300000,1767356100000,1800,yes,quiet environment helped,1767356280000
+4,Implement login screen,Coding,1767345300000,1767347400000,2100,yes,easy to continue after starting,1767347760000
+5,Refactor coach card,Coding,1767472200000,1767474000000,1800,no,phone distraction and low energy,1767474180000
+6,Build export pipeline,Coding,1767447900000,1767450000000,2100,yes,quiet environment helped,1767450420000
+7,Write unit tests,Coding,1767519600000,1767522300000,2700,partial,late night coding felt heavy,1767522780000
+8,Sort priorities,Planning,1767542400000,1767543000000,600,partial,planning became overthinking,1767543240000
+9,Read research paper,Reading,1767598800000,1767600600000,1800,no,phone and tiredness interrupted me; phone distraction,1767600780000
+10,Write reflection notes,Writing,1767619200000,1767621000000,1800,partial,too tired to write clearly,1767621060000
+11,Organize backlog,Planning,1767654600000,1767655500000,900,partial,too many interruptions; school stress,1767655980000
+12,Fix bug in timer logic,Coding,1767732600000,1767733800000,1200,partial,too tired after school,1767733980000
+13,Practice exam problems,Study,1767698100000,1767698700000,600,partial,hard to stay with the material,1767699120000
+14,Fix bug in timer logic,Coding,1767829500000,1767831300000,1800,no,late night coding felt heavy; school stress,1767831480000
+15,Write unit tests,Coding,1767786600000,1767788400000,1800,yes,felt focused and clear,1767788700000
+16,Refactor coach card,Coding,1767889200000,1767891000000,1800,no,late night coding felt heavy; phone distraction,1767891180000
+17,Build export pipeline,Coding,1767948000000,1767948600000,600,partial,too tired after school,1767949020000
+18,Write unit tests,Coding,1767962700000,1767963900000,1200,partial,phone distraction and low energy; school stress,1767964020000
+19,Solve exercises,Study,1768074300000,1768074900000,600,partial,low energy and weak memory,1768075200000
+20,Prepare summary,Writing,1768065600000,1768066200000,600,no,unclear ideas and stress,1768066500000
+21,Implement login screen,Coding,1768122000000,1768124700000,2700,yes,easy to continue after starting,1768124940000
+22,Read research paper,Reading,1768138800000,1768139700000,900,partial,text felt too dense at this hour,1768139760000
+23,Study algorithms,Study,1768205700000,1768206900000,1200,yes,review session went smoothly,1768207440000
+24,Build export pipeline,Coding,1768219800000,1768221000000,1200,yes,easy to continue after starting; good rhythm,1768221060000
+25,Write lab report,Writing,1768302900000,1768303500000,600,partial,late session and low motivation,1768304040000
+26,Write thesis section,Writing,1768321200000,1768322700000,1500,yes,simple task and strong focus,1768322820000
+27,Study algorithms,Study,1768434300000,1768434900000,600,partial,school fatigue and poor focus,1768435500000
+28,Implement login screen,Coding,1768476600000,1768478100000,1500,yes,easy to continue after starting; good rhythm,1768478220000
+29,Write unit tests,Coding,1768470000000,1768470600000,600,no,hard to start because mind was scattered,1768470840000
+30,Read thesis notes,Reading,1768470000000,1768471800000,1800,yes,short breaks worked well; good rhythm,1768472040000
+31,Refactor coach card,Coding,1768587600000,1768590300000,2700,no,too tired after school,1768590360000
+32,Review goals,Planning,1768664400000,1768665600000,1200,yes,organized thoughts well,1768665900000
+33,Review lecture notes,Study,1768662600000,1768665300000,2700,no,hard to stay with the material; school stress; phone distraction,1768665840000
+34,Solve exercises,Study,1768729200000,1768731000000,1800,partial,kept switching tasks; phone distraction,1768731120000
+35,Memorize definitions,Study,1768842900000,1768843500000,600,partial,hard to stay with the material,1768843920000
+36,Organize backlog,Planning,1768853400000,1768854900000,1500,yes,planning felt light and useful,1768854960000
+37,Refactor coach card,Coding,1768822200000,1768824900000,2700,yes,good energy today,1768825140000
+38,Read documentation,Reading,1768900800000,1768902300000,1500,partial,noise broke concentration,1768902360000
+39,Memorize definitions,Study,1768909800000,1768911300000,1500,partial,low energy and weak memory,1768911900000
+40,Refactor coach card,Coding,1768986600000,1768989300000,2700,no,too tired after school; phone distraction,1768989360000
+41,Read documentation,Reading,1769107500000,1769108700000,1200,no,school stress made reading hard; phone distraction,1769108940000
+42,Write thesis section,Writing,1769162400000,1769163600000,1200,yes,low distraction and steady progress; good rhythm,1769163720000
+43,Read documentation,Reading,1769166600000,1769167200000,600,yes,short breaks worked well,1769167620000
+44,Study algorithms,Study,1769289600000,1769290800000,1200,yes,steady attention during study; good rhythm,1769291040000
+45,Write thesis section,Writing,1769249400000,1769252100000,2700,yes,good flow while writing; good rhythm,1769252580000
+46,Draft README,Writing,1769362200000,1769363400000,1200,partial,kept checking phone,1769363880000
+47,Read documentation,Reading,1769444400000,1769445900000,1500,yes,calm morning helped reading; good rhythm,1769446380000
+48,Implement login screen,Coding,1769417400000,1769418900000,1500,no,phone distraction and low energy,1769419140000
+49,Organize backlog,Planning,1769632800000,1769633700000,900,yes,clear priorities today,1769634240000
+50,Implement login screen,Coding,1769596200000,1769597700000,1500,yes,quiet environment helped,1769598060000
+51,Read OS chapter,Reading,1769716200000,1769718000000,1800,yes,fresh mind for reading; good rhythm,1769718420000
+52,Read documentation,Reading,1769711400000,1769712000000,600,no,noise broke concentration; phone distraction,1769712120000
+53,Refactor coach card,Coding,1769690700000,1769692800000,2100,yes,felt focused and clear; good rhythm,1769693520000
+54,Draft README,Writing,1769769000000,1769770500000,1500,yes,writing felt easier than expected,1769770680000
+55,Memorize definitions,Study,1769775300000,1769776500000,1200,yes,steady attention during study,1769776560000
+56,Memorize definitions,Study,1769843400000,1769844300000,900,partial,kept switching tasks,1769844960000
+57,Refactor coach card,Coding,1769819400000,1769820900000,1500,no,phone distraction and low energy; school stress,1769821560000
+58,Prepare study plan,Planning,1770035400000,1770038100000,2700,partial,too many interruptions; school stress,1770038460000
+59,Organize backlog,Planning,1770025200000,1770027000000,1800,no,mental fatigue reduced clarity,1770027420000
+60,Build export pipeline,Coding,1770025200000,1770026700000,1500,yes,easy to continue after starting,1770026880000
+61,Write unit tests,Coding,1770118800000,1770120300000,1500,yes,easy to continue after starting,1770120540000
+62,Write lab report,Writing,1770124500000,1770125700000,1200,no,late session and low motivation; phone distraction,1770125820000
+63,Read thesis notes,Reading,1770192000000,1770192600000,600,no,school stress made reading hard,1770193260000
+64,Solve exercises,Study,1770192600000,1770193500000,900,yes,questions were manageable,1770194160000
+65,Plan tomorrow tasks,Planning,1770325800000,1770327300000,1500,yes,clear priorities today; good rhythm,1770327900000
+66,Build export pipeline,Coding,1770487800000,1770489900000,2100,partial,phone distraction and low energy; phone distraction,1770490020000
+67,Read thesis notes,Reading,1770541200000,1770543000000,1800,yes,fresh mind for reading,1770543300000
+68,Review lecture notes,Study,1770672600000,1770673200000,600,yes,review session went smoothly,1770673260000
+69,Write thesis section,Writing,1770625200000,1770626700000,1500,yes,writing felt easier than expected,1770627420000
+70,Read research paper,Reading,1770733800000,1770735000000,1200,no,text felt too dense at this hour,1770735180000
+71,Review goals,Planning,1770734700000,1770736200000,1500,partial,stress made priorities fuzzy; school stress,1770736740000
+72,Read research paper,Reading,1770801000000,1770801600000,600,partial,text felt too dense at this hour; phone distraction,1770801900000
+73,Fix bug in timer logic,Coding,1770831900000,1770833700000,1800,no,late night coding felt heavy,1770834180000
+74,Review article,Reading,1770909600000,1770911100000,1500,no,sleepy and distracted,1770911520000
+75,Prepare summary,Writing,1770893400000,1770894600000,1200,partial,school pressure made writing harder,1770895260000
+76,Write lab report,Writing,1770897000000,1770898500000,1500,no,unclear ideas and stress,1770899040000
+77,Practice exam problems,Study,1770985800000,1770987000000,1200,yes,good discipline today,1770987420000
+78,Organize backlog,Planning,1771020900000,1771023000000,2100,yes,organized thoughts well,1771023720000
+79,Memorize definitions,Study,1770997200000,1770999000000,1800,no,kept switching tasks,1770999060000
+80,Read thesis notes,Reading,1771069200000,1771071000000,1800,yes,fresh mind for reading; good rhythm,1771071060000
+81,Refactor coach card,Coding,1771193400000,1771194900000,1500,partial,too tired after school; phone distraction,1771195620000
+82,Write lab report,Writing,1771249800000,1771250700000,900,yes,clear ideas today; good rhythm,1771251060000
+83,Study algorithms,Study,1771232400000,1771233000000,600,yes,good discipline today,1771233480000
+84,Write lab report,Writing,1771353000000,1771354200000,1200,no,unclear ideas and stress,1771354560000
+85,Build export pipeline,Coding,1771311600000,1771312800000,1200,yes,easy to continue after starting,1771313220000
+86,Prepare summary,Writing,1771431000000,1771431900000,900,partial,too tired to write clearly; school stress; phone distraction,1771432320000
+87,Plan tomorrow tasks,Planning,1771436700000,1771438200000,1500,partial,not enough energy for decisions,1771438320000
+88,Organize backlog,Planning,1771513800000,1771514400000,600,yes,clear priorities today,1771514460000
+89,Review lecture notes,Study,1771486800000,1771488600000,1800,no,school fatigue and poor focus,1771489080000
+90,Read documentation,Reading,1771599600000,1771600800000,1200,partial,text felt too dense at this hour; phone distraction,1771601160000
+91,Write thesis section,Writing,1771659600000,1771661700000,2100,no,too tired to write clearly,1771662300000
+92,Implement login screen,Coding,1771668900000,1771670400000,1500,partial,hard to start because mind was scattered,1771670700000
+93,Read documentation,Reading,1771785000000,1771786500000,1500,partial,sleepy and distracted,1771786920000
+94,Read thesis notes,Reading,1771766400000,1771767000000,600,partial,noise broke concentration,1771767240000
+95,Write unit tests,Coding,1771862400000,1771863000000,600,yes,deep work felt natural,1771863240000
+96,Write unit tests,Coding,1771836300000,1771836900000,600,yes,quiet environment helped,1771837380000
+97,Review lecture notes,Study,1771946100000,1771947300000,1200,yes,questions were manageable; good rhythm,1771947600000
+98,Review lecture notes,Study,1771935300000,1771936500000,1200,yes,review session went smoothly,1771936980000
+99,Practice exam problems,Study,1771973400000,1771975200000,1800,no,too much mental load today; phone distraction,1771975920000
+100,Read research paper,Reading,1772046900000,1772048100000,1200,partial,text felt too dense at this hour,1772048580000
+101,Write reflection notes,Writing,1772014200000,1772014800000,600,no,school pressure made writing harder,1772014920000
+102,Build export pipeline,Coding,1772091000000,1772091600000,600,partial,late night coding felt heavy,1772092080000
+103,Implement login screen,Coding,1772129700000,1772130600000,900,yes,easy to continue after starting,1772130900000
+104,Read documentation,Reading,1772098800000,1772100000000,1200,yes,calm morning helped reading; good rhythm,1772100480000
+105,Review goals,Planning,1772220000000,1772221800000,1800,partial,not enough energy for decisions,1772222100000
+106,Implement login screen,Coding,1772266200000,1772267400000,1200,yes,felt focused and clear; good rhythm,1772268120000
+107,Implement login screen,Coding,1772362200000,1772363700000,1500,yes,felt focused and clear; good rhythm,1772363880000
+108,Practice exam problems,Study,1772495100000,1772496600000,1500,no,low energy and weak memory; phone distraction,1772496960000
+109,Study algorithms,Study,1772559600000,1772561100000,1500,partial,too much mental load today,1772561460000
+110,Read OS chapter,Reading,1772550000000,1772551800000,1800,no,school stress made reading hard,1772552460000
+111,Sort priorities,Planning,1772525400000,1772526000000,600,partial,too many interruptions; phone distraction,1772526480000
+112,Review article,Reading,1772655600000,1772657100000,1500,no,noise broke concentration,1772657400000
+113,Read thesis notes,Reading,1772750400000,1772751900000,1500,partial,sleepy and distracted; school stress,1772752440000
+114,Fix bug in timer logic,Coding,1772748900000,1772750100000,1200,partial,late night coding felt heavy,1772750820000
+115,Write lab report,Writing,1772727300000,1772728500000,1200,no,school pressure made writing harder; school stress,1772728800000
+116,Fix bug in timer logic,Coding,1772830200000,1772831400000,1200,partial,context switching hurt focus,1772831520000
+117,Write unit tests,Coding,1772814600000,1772816100000,1500,no,late night coding felt heavy,1772816460000
+118,Memorize definitions,Study,1772922000000,1772924700000,2700,partial,hard to stay with the material,1772924880000
+119,Review lecture notes,Study,1772925300000,1772926800000,1500,partial,hard to stay with the material,1772927460000
+120,Practice exam problems,Study,1773054000000,1773056100000,2100,partial,hard to stay with the material; phone distraction,1773056340000
+121,Write thesis section,Writing,1773058500000,1773059100000,600,no,unclear ideas and stress; school stress; phone distraction,1773059580000
+122,Solve exercises,Study,1773129600000,1773130800000,1200,yes,good discipline today,1773131280000
+123,Build export pipeline,Coding,1773218400000,1773219000000,600,no,hard to start because mind was scattered,1773219480000
+124,Fix bug in timer logic,Coding,1773223200000,1773225000000,1800,yes,good energy today,1773225180000
+125,Read thesis notes,Reading,1773307200000,1773308400000,1200,yes,good concentration and low noise,1773308700000
+126,Memorize definitions,Study,1773427200000,1773428400000,1200,no,hard to stay with the material; phone distraction,1773428940000
+127,Write reflection notes,Writing,1773411600000,1773412800000,1200,no,unclear ideas and stress; phone distraction,1773413520000
+128,Fix bug in timer logic,Coding,1773474000000,1773475800000,1800,partial,phone distraction and low energy,1773476040000
+129,Read thesis notes,Reading,1773495000000,1773495600000,600,no,text felt too dense at this hour; school stress,1773495840000
+130,Draft README,Writing,1773584100000,1773585300000,1200,yes,good flow while writing,1773585540000
+131,Plan tomorrow tasks,Planning,1773602400000,1773604200000,1800,no,not enough energy for decisions,1773604920000
+132,Solve exercises,Study,1773691200000,1773692700000,1500,yes,questions were manageable,1773692940000
+133,Fix bug in timer logic,Coding,1773655800000,1773656700000,900,yes,deep work felt natural,1773656940000
+134,Build export pipeline,Coding,1773742500000,1773744000000,1500,yes,deep work felt natural,1773744120000
+135,Plan tomorrow tasks,Planning,1773747600000,1773748800000,1200,no,planning became overthinking,1773748920000
+136,Study algorithms,Study,1773825000000,1773826500000,1500,partial,too much mental load today; phone distraction,1773826560000
+137,Review goals,Planning,1773862800000,1773864000000,1200,partial,too many interruptions; phone distraction,1773864540000
+138,Review lecture notes,Study,1773940800000,1773942300000,1500,partial,kept switching tasks,1773942480000
+139,Implement login screen,Coding,1773920700000,1773921300000,600,yes,easy to continue after starting,1773921660000
+140,Write lab report,Writing,1774024800000,1774026300000,1500,yes,good flow while writing,1774026900000
+141,Organize backlog,Planning,1774017600000,1774019100000,1500,partial,mental fatigue reduced clarity,1774019280000
+142,Implement login screen,Coding,1774091400000,1774092300000,900,no,too tired after school,1774093020000
+143,Sort priorities,Planning,1774183800000,1774184400000,600,yes,clear priorities today,1774185120000
+144,Practice exam problems,Study,1774177200000,1774178400000,1200,yes,good discipline today,1774178640000
+145,Review goals,Planning,1774256400000,1774258200000,1800,yes,easy to make decisions,1774258560000
+146,Read OS chapter,Reading,1774266600000,1774267200000,600,yes,calm morning helped reading,1774267380000
+147,Memorize definitions,Study,1774296000000,1774296600000,600,partial,hard to stay with the material,1774296660000
+148,Sort priorities,Planning,1774380000000,1774381200000,1200,yes,clear priorities today,1774381560000
+149,Review goals,Planning,1774445400000,1774446600000,1200,yes,good overview of tasks,1774447140000
+150,Write thesis section,Writing,1774516800000,1774518900000,2100,no,kept checking phone,1774519620000
+151,Study algorithms,Study,1774557600000,1774559700000,2100,partial,too much mental load today; phone distraction,1774560360000
+152,Implement login screen,Coding,1774647600000,1774648200000,600,yes,easy to continue after starting; good rhythm,1774648800000
+153,Refactor coach card,Coding,1774621800000,1774623300000,1500,no,too tired after school; phone distraction,1774623780000
+154,Practice exam problems,Study,1774725300000,1774725900000,600,partial,kept switching tasks,1774726260000
+155,Build export pipeline,Coding,1774806000000,1774807800000,1800,partial,hard to start because mind was scattered,1774807860000
+156,Practice exam problems,Study,1774768500000,1774769400000,900,no,kept switching tasks,1774769760000
+157,Solve exercises,Study,1774871400000,1774872900000,1500,yes,review session went smoothly; good rhythm,1774872960000
+158,Write lab report,Writing,1774871400000,1774872900000,1500,yes,low distraction and steady progress,1774873080000
+159,Write thesis section,Writing,1774954200000,1774955100000,900,partial,unclear ideas and stress,1774955220000
+160,Refactor coach card,Coding,1774946400000,1774947300000,900,no,hard to start because mind was scattered,1774947540000
+161,Draft README,Writing,1775080800000,1775082900000,2100,partial,unclear ideas and stress,1775083320000
+162,Implement login screen,Coding,1775123100000,1775125200000,2100,partial,late night coding felt heavy; phone distraction,1775125260000
+163,Write unit tests,Coding,1775177100000,1775177700000,600,partial,too tired after school,1775178240000
+164,Fix bug in timer logic,Coding,1775287800000,1775289000000,1200,no,late night coding felt heavy; phone distraction,1775289300000
+165,Read research paper,Reading,1775292300000,1775294100000,1800,no,school stress made reading hard; phone distraction,1775294820000
+166,Read documentation,Reading,1775317200000,1775318400000,1200,no,text felt too dense at this hour,1775318640000
+167,Study algorithms,Study,1775409600000,1775411700000,2100,no,low energy and weak memory,1775412240000
+168,Build export pipeline,Coding,1775497200000,1775498400000,1200,no,phone distraction and low energy,1775498820000
+169,Read documentation,Reading,1775549700000,1775550300000,600,yes,fresh mind for reading,1775550900000
+170,Practice exam problems,Study,1775640600000,1775641500000,900,partial,hard to stay with the material,1775641740000
+171,Write unit tests,Coding,1775766600000,1775767800000,1200,yes,good energy today,1775768040000
+172,Prepare study plan,Planning,1775825400000,1775827500000,2100,partial,not enough energy for decisions; phone distraction,1775827980000
+173,Plan tomorrow tasks,Planning,1775818200000,1775818800000,600,yes,easy to make decisions,1775818920000
+174,Read OS chapter,Reading,1775909700000,1775910900000,1200,yes,good concentration and low noise,1775911200000
+175,Read research paper,Reading,1775903400000,1775904600000,1200,yes,fresh mind for reading,1775905080000
+176,Build export pipeline,Coding,1775990400000,1775991000000,600,yes,quiet environment helped,1775991240000
+177,Write unit tests,Coding,1775996100000,1775998200000,2100,yes,deep work felt natural; good rhythm,1775998920000
+178,Practice exam problems,Study,1776114600000,1776116100000,1500,yes,good discipline today,1776116760000
+179,Review lecture notes,Study,1776191400000,1776193500000,2100,partial,too much mental load today,1776193920000
+180,Fix bug in timer logic,Coding,1776161400000,1776162000000,600,yes,easy to continue after starting,1776162300000
+181,Write reflection notes,Writing,1776156600000,1776157800000,1200,partial,school pressure made writing harder,1776158400000
+182,Read OS chapter,Reading,1776262500000,1776263100000,600,partial,phone and tiredness interrupted me,1776263280000
+183,Review lecture notes,Study,1776339600000,1776340200000,600,partial,kept switching tasks; phone distraction,1776340560000
+184,Write lab report,Writing,1776421200000,1776421800000,600,partial,kept checking phone,1776422100000
+185,Write lab report,Writing,1776445800000,1776448500000,2700,partial,too tired to write clearly,1776448620000
+186,Write lab report,Writing,1776511200000,1776512100000,900,partial,unclear ideas and stress,1776512700000
+187,Read documentation,Reading,1776597300000,1776597900000,600,partial,text felt too dense at this hour; phone distraction,1776598080000
+188,Practice exam problems,Study,1776699600000,1776701700000,2100,no,too much mental load today; phone distraction,1776702120000
+189,Solve exercises,Study,1776675600000,1776677400000,1800,no,too much mental load today,1776678120000
+190,Review goals,Planning,1776717900000,1776719700000,1800,partial,not enough energy for decisions,1776719940000
+191,Review lecture notes,Study,1776875400000,1776876600000,1200,yes,good discipline today,1776877080000
+192,Prepare summary,Writing,1776931200000,1776932400000,1200,partial,kept checking phone,1776932760000
+193,Organize backlog,Planning,1776950100000,1776951300000,1200,yes,clear priorities today,1776951780000
+194,Build export pipeline,Coding,1777041600000,1777042800000,1200,no,late night coding felt heavy; phone distraction,1777043280000
+195,Study algorithms,Study,1777052400000,1777053900000,1500,yes,questions were manageable; good rhythm,1777054500000
+196,Memorize definitions,Study,1777117500000,1777119000000,1500,no,low energy and weak memory,1777119720000
+197,Refactor coach card,Coding,1777210200000,1777212000000,1800,yes,felt focused and clear,1777212420000
+198,Review article,Reading,1777310400000,1777312500000,2100,no,text felt too dense at this hour,1777312560000
+199,Sort priorities,Planning,1777379400000,1777380600000,1200,yes,easy to make decisions,1777381200000
+200,Read thesis notes,Reading,1777506300000,1777507500000,1200,no,sleepy and distracted; phone distraction,1777508160000
+201,Write reflection notes,Writing,1777480200000,1777482000000,1800,partial,too tired to write clearly; school stress,1777482540000
+202,Solve exercises,Study,1777584600000,1777586400000,1800,partial,hard to stay with the material,1777586640000

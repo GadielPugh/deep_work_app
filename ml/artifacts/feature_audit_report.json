@@ -1,0 +1,225 @@
+{
+  "chosen_export_model": "model_a_session_only",
+  "selection_reason": "Selected Model A: session-only with F1=0.417. Model C was not selected because coach-context features looked dominant.",
+  "variants": {
+    "model_a_session_only": {
+      "coach_feature_count": 0,
+      "coach_feature_in_top_three": false,
+      "coach_top_weight_share": 0.0,
+      "name": "Model A: session-only",
+      "notes": [
+        "No coach feedback or coach snapshot features in this variant."
+      ],
+      "strongest_feature_is_coach_context": false,
+      "suspicious_coach_context_dependence": false,
+      "top_weighted_features": [
+        {
+          "abs_coefficient": 0.8381448580714415,
+          "coefficient": 0.8381448580714415,
+          "feature": "day_of_week=monday"
+        },
+        {
+          "abs_coefficient": 0.8351451069228734,
+          "coefficient": -0.8351451069228734,
+          "feature": "time_block=evening"
+        },
+        {
+          "abs_coefficient": 0.7277780961244769,
+          "coefficient": 0.7277780961244769,
+          "feature": "time_block=morning"
+        },
+        {
+          "abs_coefficient": 0.4145714616490073,
+          "coefficient": 0.4145714616490073,
+          "feature": "duration_bucket=standard"
+        },
+        {
+          "abs_coefficient": 0.35109311762795137,
+          "coefficient": -0.35109311762795137,
+          "feature": "day_of_week=tuesday"
+        },
+        {
+          "abs_coefficient": 0.34484388527535076,
+          "coefficient": -0.34484388527535076,
+          "feature": "day_of_week=saturday"
+        },
+        {
+          "abs_coefficient": 0.3246970523959147,
+          "coefficient": -0.3246970523959147,
+          "feature": "category=Reading"
+        },
+        {
+          "abs_coefficient": 0.32022386129309927,
+          "coefficient": -0.32022386129309927,
+          "feature": "recent_tag_interruption"
+        },
+        {
+          "abs_coefficient": 0.31464776538578193,
+          "coefficient": -0.31464776538578193,
+          "feature": "recent_category_success_rate"
+        },
+        {
+          "abs_coefficient": 0.30954570785802965,
+          "coefficient": -0.30954570785802965,
+          "feature": "duration_bucket=long"
+        },
+        {
+          "abs_coefficient": 0.3031346437324337,
+          "coefficient": -0.3031346437324337,
+          "feature": "day_of_week=wednesday"
+        },
+        {
+          "abs_coefficient": 0.29463836685877154,
+          "coefficient": 0.29463836685877154,
+          "feature": "category=Planning"
+        }
+      ]
+    },
+    "model_b_reflection_plus": {
+      "coach_feature_count": 0,
+      "coach_feature_in_top_three": false,
+      "coach_top_weight_share": 0.0,
+      "name": "Model B: reflection-plus",
+      "notes": [
+        "No coach feedback or coach snapshot features in this variant."
+      ],
+      "strongest_feature_is_coach_context": false,
+      "suspicious_coach_context_dependence": false,
+      "top_weighted_features": [
+        {
+          "abs_coefficient": 0.8382520599066704,
+          "coefficient": 0.8382520599066704,
+          "feature": "day_of_week=monday"
+        },
+        {
+          "abs_coefficient": 0.834953168966648,
+          "coefficient": -0.834953168966648,
+          "feature": "time_block=evening"
+        },
+        {
+          "abs_coefficient": 0.7276727012401368,
+          "coefficient": 0.7276727012401368,
+          "feature": "time_block=morning"
+        },
+        {
+          "abs_coefficient": 0.41454988639613216,
+          "coefficient": 0.41454988639613216,
+          "feature": "duration_bucket=standard"
+        },
+        {
+          "abs_coefficient": 0.3499188724914292,
+          "coefficient": -0.3499188724914292,
+          "feature": "day_of_week=tuesday"
+        },
+        {
+          "abs_coefficient": 0.34540160435845246,
+          "coefficient": -0.34540160435845246,
+          "feature": "day_of_week=saturday"
+        },
+        {
+          "abs_coefficient": 0.32474233987412776,
+          "coefficient": -0.32474233987412776,
+          "feature": "category=Reading"
+        },
+        {
+          "abs_coefficient": 0.3145453723835155,
+          "coefficient": -0.3145453723835155,
+          "feature": "recent_category_success_rate"
+        },
+        {
+          "abs_coefficient": 0.3101185200957004,
+          "coefficient": -0.3101185200957004,
+          "feature": "duration_bucket=long"
+        },
+        {
+          "abs_coefficient": 0.30416600146311246,
+          "coefficient": -0.30416600146311246,
+          "feature": "recent_tag_interruption"
+        },
+        {
+          "abs_coefficient": 0.302390120396017,
+          "coefficient": -0.302390120396017,
+          "feature": "day_of_week=wednesday"
+        },
+        {
+          "abs_coefficient": 0.2945533028182876,
+          "coefficient": 0.2945533028182876,
+          "feature": "category=Planning"
+        }
+      ]
+    },
+    "model_c_coach_context": {
+      "coach_feature_count": 12,
+      "coach_feature_in_top_three": true,
+      "coach_top_weight_share": 0.7365687095057707,
+      "name": "Model C: coach-context",
+      "notes": [
+        "Coach-context features dominate the top weights; treat this variant as suspicious for export."
+      ],
+      "strongest_feature_is_coach_context": true,
+      "suspicious_coach_context_dependence": true,
+      "top_weighted_features": [
+        {
+          "abs_coefficient": 3.5750094456048647,
+          "coefficient": -3.5750094456048647,
+          "feature": "latest_coach_message_type=warning"
+        },
+        {
+          "abs_coefficient": 1.4073636128259566,
+          "coefficient": 1.4073636128259566,
+          "feature": "latest_coach_message_type=positive"
+        },
+        {
+          "abs_coefficient": 0.9614950409644661,
+          "coefficient": 0.9614950409644661,
+          "feature": "latest_coach_message_type=neutral"
+        },
+        {
+          "abs_coefficient": 0.34935860416659953,
+          "coefficient": 0.34935860416659953,
+          "feature": "day_of_week=thursday"
+        },
+        {
+          "abs_coefficient": 0.31578264470559486,
+          "coefficient": 0.31578264470559486,
+          "feature": "category=Coding"
+        },
+        {
+          "abs_coefficient": 0.3143163848536095,
+          "coefficient": -0.3143163848536095,
+          "feature": "recent_category_success_rate"
+        },
+        {
+          "abs_coefficient": 0.3004242929798122,
+          "coefficient": 0.3004242929798122,
+          "feature": "time_block=morning"
+        },
+        {
+          "abs_coefficient": 0.29569530750623985,
+          "coefficient": 0.29569530750623985,
+          "feature": "duration_bucket=standard"
+        },
+        {
+          "abs_coefficient": 0.2245889700648834,
+          "coefficient": -0.2245889700648834,
+          "feature": "time_block=evening"
+        },
+        {
+          "abs_coefficient": 0.21796988924012958,
+          "coefficient": 0.21796988924012958,
+          "feature": "latest_coach_confidence_label=high"
+        },
+        {
+          "abs_coefficient": 0.20553951804389745,
+          "coefficient": -0.20553951804389745,
+          "feature": "day_of_week=saturday"
+        },
+        {
+          "abs_coefficient": 0.1980546495416932,
+          "coefficient": 0.1980546495416932,
+          "feature": "time_block=afternoon"
+        }
+      ]
+    }
+  }
+}

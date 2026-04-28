@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:deep_work/models/completion_status.dart';
 import 'package:deep_work/models/focus_category.dart';
+import 'package:deep_work/services/app_services.dart';
 import 'package:deep_work/state/sessions_state.dart';
 
 class SessionReflectionPage extends StatefulWidget {
@@ -49,6 +50,15 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
       outcome: status.name,
       reflection: reflection.isEmpty ? null : reflection,
     );
+    try {
+      await AppServices.mlShadowModeService.markMostRecentPendingOutcome(
+        resolvedAt: widget.stoppedAt,
+        outcome: status,
+        completedSessionCategoryId: widget.category.id,
+      );
+    } catch (_) {
+      // Shadow logging must never block or alter session completion.
+    }
     if (!mounted) return;
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
@@ -124,7 +134,9 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
                       icon: CupertinoIcons.checkmark_circle,
                       color: CupertinoColors.systemGreen,
                       isSelected: _selectedStatus == CompletionStatus.yes,
-                      onTap: () => setState(() => _selectedStatus = CompletionStatus.yes),
+                      onTap: () => setState(
+                        () => _selectedStatus = CompletionStatus.yes,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -134,7 +146,9 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
                       icon: CupertinoIcons.minus_circle,
                       color: const Color.fromARGB(255, 231, 153, 45),
                       isSelected: _selectedStatus == CompletionStatus.partially,
-                      onTap: () => setState(() => _selectedStatus = CompletionStatus.partially),
+                      onTap: () => setState(
+                        () => _selectedStatus = CompletionStatus.partially,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -144,7 +158,8 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
                       icon: CupertinoIcons.xmark_circle,
                       color: CupertinoColors.systemRed,
                       isSelected: _selectedStatus == CompletionStatus.no,
-                      onTap: () => setState(() => _selectedStatus = CompletionStatus.no),
+                      onTap: () =>
+                          setState(() => _selectedStatus = CompletionStatus.no),
                     ),
                   ),
                 ],
@@ -161,7 +176,8 @@ class _SessionReflectionPageState extends State<SessionReflectionPage> {
               const SizedBox(height: 12),
               CupertinoTextField(
                 controller: _reflectionController,
-                placeholder: 'E.g., Found a quiet space, but phone notifications were distracting',
+                placeholder:
+                    'E.g., Found a quiet space, but phone notifications were distracting',
                 padding: const EdgeInsets.all(16),
                 maxLines: 4,
                 minLines: 3,
@@ -205,7 +221,9 @@ class _CompletionButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.15) : CupertinoColors.tertiarySystemFill,
+          color: isSelected
+              ? color.withOpacity(0.15)
+              : CupertinoColors.tertiarySystemFill,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? color : CupertinoColors.separator,

@@ -31,6 +31,7 @@ class _InsightsTabState extends State<InsightsTab> {
 
   bool _showDetails = false;
   String? _lastSavedCoachSnapshotSignature;
+  String? _lastSavedShadowDecisionSignature;
 
   @override
   void initState() {
@@ -63,6 +64,11 @@ class _InsightsTabState extends State<InsightsTab> {
 
     if (!isLoading) {
       _scheduleCoachSnapshotSave(coachSnapshot);
+      _scheduleMlShadowLog(
+        message: coachMessage,
+        now: now,
+        sessionsCount: SessionsState.instance.sessions.length,
+      );
     }
 
     return CupertinoPageScaffold(
@@ -151,6 +157,36 @@ class _InsightsTabState extends State<InsightsTab> {
         _lastSavedCoachSnapshotSignature = null;
       }
       // Keep the coach UI resilient even if local persistence is unavailable.
+    }
+  }
+
+  void _scheduleMlShadowLog({
+    required FocusCoachMessage message,
+    required DateTime now,
+    required int sessionsCount,
+  }) {
+    final signature =
+        '${CoachMessageSnapshot.fromMessage(message, createdAt: now).signature}|$sessionsCount';
+    if (_lastSavedShadowDecisionSignature == signature) return;
+
+    _lastSavedShadowDecisionSignature = signature;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_recordMlShadowDecision(message: message, now: now));
+    });
+  }
+
+  Future<void> _recordMlShadowDecision({
+    required FocusCoachMessage message,
+    required DateTime now,
+  }) async {
+    try {
+      await AppServices.mlShadowModeService.recordCoachDecision(
+        message: message,
+        now: now,
+        sessions: SessionsState.instance.sessions,
+      );
+    } catch (_) {
+      // Shadow mode must never affect the live coach experience.
     }
   }
 }
@@ -418,6 +454,13 @@ class _CoachFeedbackBarState extends State<_CoachFeedbackBar> {
         optionalReason: optionalReason,
       );
       await AppServices.coachStorage.saveFeedback(entry);
+      try {
+        await AppServices.personalizationProfileService.recordCoachFeedback(
+          entry,
+        );
+      } catch (_) {
+        // Personalization updates must never interrupt feedback capture.
+      }
 
       if (!mounted) return;
       setState(() {

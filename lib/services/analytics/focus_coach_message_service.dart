@@ -63,6 +63,20 @@ class FocusCoachMessageService {
     final durationText =
         'Try ${recommendation.recommendedDurationMinutes} min of $categoryName';
 
+    if (recommendation.isCautiousFallback && recommendation.sampleCount == 0) {
+      return FocusCoachMessage(
+        title: 'Start small with $categoryName.',
+        body:
+            'A short session is the safest first step while your pattern is forming.',
+        actionText: durationText,
+        confidenceLabel: 'Keep it simple',
+        reasonLine: reflectionHint,
+        recommendedCategory: categoryName,
+        recommendedDurationMinutes: recommendation.recommendedDurationMinutes,
+        type: FocusCoachMessageType.suggestion,
+      );
+    }
+
     if (data.predictionWarning != null) {
       return FocusCoachMessage(
         title: 'Right now, $categoryName looks like your best option.',

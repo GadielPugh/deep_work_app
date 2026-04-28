@@ -45,6 +45,17 @@ class SessionsState extends ChangeNotifier {
       outcome: outcome,
       reflection: reflection,
     );
+    try {
+      await AppServices.personalizationProfileService.recordCompletedSession(
+        categoryId: category,
+        startedAt: startedAt,
+        durationSeconds: durationSeconds,
+        outcome: outcome,
+        reflection: reflection,
+      );
+    } catch (_) {
+      // Local learning should never block saving the completed session.
+    }
     await load();
   }
 

@@ -1,9 +1,11 @@
 import 'package:deep_work/models/ml/prediction_dtos.dart';
 import 'package:deep_work/models/analytics/insight_confidence_dtos.dart';
 import 'package:deep_work/models/focus_category.dart';
+import 'package:deep_work/models/personalization/local_personalization_profile.dart';
 import 'package:deep_work/session_model.dart';
 import 'package:deep_work/services/feature_engineering/focus_feature_engineering.dart';
 import 'package:deep_work/services/analytics/insight_confidence_service.dart';
+import 'package:deep_work/services/personalization/personalized_recommendation_service.dart';
 
 import 'session_success_predictor.dart';
 
@@ -32,11 +34,15 @@ class SessionSuccessRecommendationService {
   SessionSuccessRecommendationService({
     required this.predictor,
     required this.featureEngineeringService,
+    this.personalizationProfileProvider,
+    this.personalizedRecommendationService,
   }) : _confidenceService = const InsightConfidenceService();
 
   final SessionSuccessPredictor predictor;
   final FocusFeatureEngineeringService featureEngineeringService;
   final InsightConfidenceService _confidenceService;
+  final LocalPersonalizationProfile Function()? personalizationProfileProvider;
+  final PersonalizedRecommendationService? personalizedRecommendationService;
 
   /// Picks the category that maximizes predicted success probability for the
   /// current hour, using each category's rolling-average duration as the
@@ -48,6 +54,15 @@ class SessionSuccessRecommendationService {
   }) {
     if (categories.isEmpty) {
       throw ArgumentError('categories must not be empty');
+    }
+
+    final personalizedRecommendation = _personalizedRecommendationOrNull(
+      now: now,
+      sessions: sessions,
+      categories: categories,
+    );
+    if (personalizedRecommendation != null) {
+      return personalizedRecommendation;
     }
 
     if (sessions.isEmpty) {
@@ -183,6 +198,38 @@ class SessionSuccessRecommendationService {
           sampleCount: 0,
           isCautiousFallback: true,
         );
+  }
+
+  CategoryRecommendation? _personalizedRecommendationOrNull({
+    required DateTime now,
+    required List<Session> sessions,
+    required List<FocusCategory> categories,
+  }) {
+    final profileProvider = personalizationProfileProvider;
+    final service = personalizedRecommendationService;
+    if (profileProvider == null || service == null) return null;
+
+    try {
+      final profile = profileProvider();
+      if (sessions.isNotEmpty && profile.totalSessions == 0) return null;
+
+      final recommendation = service.recommend(
+        now: now,
+        categories: categories,
+        profile: profile,
+      );
+      return CategoryRecommendation(
+        categoryId: recommendation.categoryId,
+        categoryName: recommendation.categoryName,
+        successProbability: recommendation.successProbability,
+        recommendedDurationMinutes: recommendation.recommendedDurationMinutes,
+        riskFactors: recommendation.reasons,
+        sampleCount: recommendation.sampleCount,
+        isCautiousFallback: recommendation.isCautiousFallback,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Generates a low-success warning if the best category's probability is
