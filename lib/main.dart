@@ -9,6 +9,7 @@ import 'package:deep_work/ui/categories/manage_categories_page.dart';
 // TEMPORARILY DISABLED (v1): Settings tab is ignored for now.
 // import 'package:deep_work/ui/4_settings/settingsTab.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SessionsState.instance.load();
