@@ -1,42 +1,59 @@
 import 'package:flutter/cupertino.dart';
-import 'package:deep_work/state/user_state.dart';
-import 'package:deep_work/ui/register/register_page.dart';
 
-class SettingsTab extends StatefulWidget {
+import 'package:deep_work/services/app_services.dart';
+import 'package:deep_work/services/feedback/feedback_service.dart';
+import 'package:deep_work/state/categories_state.dart';
+import 'package:deep_work/ui/categories/manage_categories_page.dart';
+
+class SettingsTab extends StatelessWidget {
   const SettingsTab({super.key});
 
   @override
-  State<SettingsTab> createState() => _SettingsTabState();
+  Widget build(BuildContext context) => const SettingsPage();
 }
 
-class _SettingsTabState extends State<SettingsTab> {
-  final _user = UserState.instance;
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final _categories = CategoriesState.instance;
 
   @override
   void initState() {
     super.initState();
-    _user.addListener(_onUserChanged);
+    _categories.addListener(_onStateChanged);
+    if (!_categories.isLoaded) {
+      _categories.load();
+    }
   }
 
   @override
   void dispose() {
-    _user.removeListener(_onUserChanged);
+    _categories.removeListener(_onStateChanged);
     super.dispose();
   }
 
-  void _onUserChanged() => setState(() {});
+  void _onStateChanged() => setState(() {});
 
-  void _openProfileEditor(BuildContext context) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(builder: (_) => const RegisterPage()),
-    );
+  void _openCategories() {
+    Navigator.of(
+      context,
+    ).push(CupertinoPageRoute(builder: (_) => const ManageCategoriesPage()));
+  }
+
+  void _openFeedback() {
+    Navigator.of(
+      context,
+    ).push(CupertinoPageRoute(builder: (_) => const FeedbackPage()));
   }
 
   @override
   Widget build(BuildContext context) {
-    final initial = _user.initial;
-    final name = _user.name.isEmpty ? 'Your name' : _user.name;
-    final email = _user.email.isEmpty ? 'Add your email' : _user.email;
+    final categoryCount = _categories.categories.length;
 
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -47,62 +64,37 @@ class _SettingsTabState extends State<SettingsTab> {
             border: null,
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 6, 20, 28),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
             sliver: SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  _ProfileCard(
-                    initial: initial,
-                    name: name,
-                    email: email,
-                    onTap: _openProfileEditor,
-                  ),
-                  SizedBox(height: 16),
-                  _SettingsGroupCard(
-                    items: [
-                      _SettingsItem(
-                        icon: CupertinoIcons.bell,
-                        iconBg: Color(0xFFEAF2FF),
-                        iconColor: CupertinoColors.activeBlue,
-                        title: 'Notifications',
-                        subtitle: 'Manage your alerts',
-                      ),
-                      _SettingsItem(
-                        icon: CupertinoIcons.moon,
-                        iconBg: Color(0xFFEDEAFF),
-                        iconColor: CupertinoColors.systemIndigo,
-                        title: 'Appearance',
-                        subtitle: 'Light mode',
-                      ),
-                      _SettingsItem(
-                        icon: CupertinoIcons.question_circle,
-                        iconBg: Color(0xFFE9F8EE),
-                        iconColor: CupertinoColors.systemGreen,
-                        title: 'Help & Support',
-                        subtitle: 'FAQs and contact',
-                      ),
-                      _SettingsItem(
-                        icon: CupertinoIcons.info_circle,
-                        iconBg: Color(0xFFF0F0F3),
-                        iconColor: CupertinoColors.systemGrey,
-                        title: 'About',
-                        subtitle: 'Version 1.0.0',
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 28),
-                  const Center(
-                    child: Text(
-                      'Made with focus and intention',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: CupertinoColors.tertiaryLabel,
-                      ),
+              delegate: SliverChildListDelegate([
+                _SettingsSection(
+                  title: 'Categories',
+                  children: [
+                    _SettingsRow(
+                      icon: CupertinoIcons.tag,
+                      iconBackground: const Color(0xFFEAF2FF),
+                      iconColor: CupertinoColors.activeBlue,
+                      title: 'Manage Categories',
+                      subtitle: '$categoryCount categories',
+                      onTap: _openCategories,
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                _SettingsSection(
+                  title: 'Send Feedback',
+                  children: [
+                    _SettingsRow(
+                      icon: CupertinoIcons.envelope,
+                      iconBackground: const Color(0xFFE9F8EE),
+                      iconColor: CupertinoColors.systemGreen,
+                      title: 'Send Feedback',
+                      subtitle: 'Write feedback in the app',
+                      onTap: _openFeedback,
+                    ),
+                  ],
+                ),
+              ]),
             ),
           ),
         ],
@@ -111,100 +103,184 @@ class _SettingsTabState extends State<SettingsTab> {
   }
 }
 
-class _Card extends StatelessWidget {
-  const _Card({required this.child, this.padding});
-
-  final Widget child;
-  final EdgeInsets? padding;
+class FeedbackPage extends StatefulWidget {
+  const FeedbackPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: padding ?? const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: CupertinoColors.systemGrey.withValues(alpha: 0.16),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
+  State<FeedbackPage> createState() => _FeedbackPageState();
 }
 
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({
-    required this.initial,
-    required this.name,
-    required this.email,
-    required this.onTap,
-  });
+class _FeedbackPageState extends State<FeedbackPage> {
+  final _nameController = TextEditingController();
+  final _contactController = TextEditingController();
+  final _messageController = TextEditingController();
 
-  final String initial;
-  final String name;
-  final String email;
-  final void Function(BuildContext context) onTap;
+  bool _isSending = false;
+  bool _hasMessage = false;
+  String? _validationMessage;
+  String? _statusMessage;
+  bool _sent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _messageController.addListener(_onMessageChanged);
+  }
+
+  @override
+  void dispose() {
+    _messageController.removeListener(_onMessageChanged);
+    _nameController.dispose();
+    _contactController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  void _onMessageChanged() {
+    final hasMessage = _messageController.text.trim().isNotEmpty;
+    if (hasMessage == _hasMessage) return;
+    setState(() => _hasMessage = hasMessage);
+  }
+
+  Future<void> _sendFeedback() async {
+    final message = _messageController.text.trim();
+    if (message.isEmpty) {
+      setState(() {
+        _validationMessage = 'Please enter feedback before sending.';
+        _statusMessage = null;
+        _sent = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isSending = true;
+      _validationMessage = null;
+      _statusMessage = null;
+      _sent = false;
+    });
+
+    try {
+      await AppServices.feedbackService.sendFeedback(
+        FeedbackSubmission(
+          name: _nameController.text,
+          contact: _contactController.text,
+          message: message,
+        ),
+      );
+      if (!mounted) return;
+      setState(() {
+        _messageController.clear();
+        _hasMessage = false;
+        _statusMessage = 'Feedback sent. Thank you.';
+        _sent = true;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _statusMessage = 'Feedback could not be sent. Please try again.';
+        _sent = false;
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isSending = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      onPressed: () => onTap(context),
-      child: _Card(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+    final canSend = _hasMessage && !_isSending;
+
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Send Feedback'),
+      ),
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
           children: [
             Container(
-              width: 62,
-              height: 62,
-              decoration: const BoxDecoration(
-                color: Color(0xFF3D5AFE),
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                initial,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: CupertinoColors.white,
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: CupertinoColors.label,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    email,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: CupertinoColors.secondaryLabel,
-                    ),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: CupertinoColors.secondarySystemGroupedBackground,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: CupertinoColors.systemGrey.withValues(alpha: 0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
-            ),
-            const Icon(
-              CupertinoIcons.chevron_forward,
-              size: 18,
-              color: CupertinoColors.tertiaryLabel,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _FieldLabel('Name'),
+                  const SizedBox(height: 8),
+                  CupertinoTextField(
+                    controller: _nameController,
+                    placeholder: 'Optional',
+                    textInputAction: TextInputAction.next,
+                    padding: const EdgeInsets.all(14),
+                  ),
+                  const SizedBox(height: 14),
+                  _FieldLabel('Contact'),
+                  const SizedBox(height: 8),
+                  CupertinoTextField(
+                    controller: _contactController,
+                    placeholder: 'Optional',
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    padding: const EdgeInsets.all(14),
+                  ),
+                  const SizedBox(height: 14),
+                  _FieldLabel('Feedback'),
+                  const SizedBox(height: 8),
+                  CupertinoTextField(
+                    key: const ValueKey('feedback_message_field'),
+                    controller: _messageController,
+                    placeholder: 'What should be improved?',
+                    minLines: 5,
+                    maxLines: 7,
+                    padding: const EdgeInsets.all(14),
+                  ),
+                  if (_validationMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _validationMessage!,
+                      style: const TextStyle(
+                        color: CupertinoColors.systemRed,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                  if (_statusMessage != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      _statusMessage!,
+                      style: TextStyle(
+                        color: _sent
+                            ? CupertinoColors.systemGreen
+                            : CupertinoColors.secondaryLabel,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 18),
+                  CupertinoButton.filled(
+                    key: const ValueKey('feedback_send_button'),
+                    onPressed: canSend ? _sendFeedback : null,
+                    child: _isSending
+                        ? const CupertinoActivityIndicator(
+                            color: CupertinoColors.white,
+                          )
+                        : const Text('Send Feedback'),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -213,103 +289,134 @@ class _ProfileCard extends StatelessWidget {
   }
 }
 
-class _SettingsGroupCard extends StatelessWidget {
-  const _SettingsGroupCard({required this.items});
+class _FieldLabel extends StatelessWidget {
+  const _FieldLabel(this.text);
 
-  final List<_SettingsItem> items;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    return _Card(
-      padding: EdgeInsets.zero,
-      child: Column(
-        children: [
-          for (var i = 0; i < items.length; i++) ...[
-            _SettingsRow(item: items[i]),
-            if (i != items.length - 1)
-              Container(
-                height: 1,
-                margin: const EdgeInsets.only(left: 70),
-                color: CupertinoColors.separator.withValues(alpha: 0.35),
-              ),
-          ],
-        ],
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: CupertinoColors.secondaryLabel,
       ),
     );
   }
 }
 
-class _SettingsItem {
-  const _SettingsItem({
-    required this.icon,
-    required this.iconBg,
-    required this.iconColor,
-    required this.title,
-    required this.subtitle,
-  });
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection({required this.title, required this.children});
 
-  final IconData icon;
-  final Color iconBg;
-  final Color iconColor;
   final String title;
-  final String subtitle;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: CupertinoColors.secondaryLabel,
+            ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: CupertinoColors.secondarySystemGroupedBackground,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: CupertinoColors.systemGrey.withValues(alpha: 0.12),
+                blurRadius: 12,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(children: children),
+        ),
+      ],
+    );
+  }
 }
 
 class _SettingsRow extends StatelessWidget {
-  const _SettingsRow({required this.item});
+  const _SettingsRow({
+    required this.icon,
+    required this.iconBackground,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+  });
 
-  final _SettingsItem item;
+  final IconData icon;
+  final Color iconBackground;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return CupertinoButton(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      onPressed: () {},
-      color: CupertinoColors.white.withValues(alpha: 0.001),
-      borderRadius: BorderRadius.zero,
-      pressedOpacity: 0.92,
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: item.iconBg,
-              shape: BoxShape.circle,
+      padding: EdgeInsets.zero,
+      onPressed: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: iconBackground,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
             ),
-            child: Icon(item.icon, color: item.iconColor, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: CupertinoColors.label,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: CupertinoColors.label,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  item.subtitle,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: CupertinoColors.secondaryLabel,
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: CupertinoColors.secondaryLabel,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const Icon(
-            CupertinoIcons.chevron_forward,
-            size: 18,
-            color: CupertinoColors.tertiaryLabel,
-          ),
-        ],
+            const SizedBox(width: 12),
+            const Icon(
+              CupertinoIcons.chevron_forward,
+              size: 18,
+              color: CupertinoColors.tertiaryLabel,
+            ),
+          ],
+        ),
       ),
     );
   }

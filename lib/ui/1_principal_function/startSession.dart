@@ -151,7 +151,7 @@ class _StartSessionPageState extends State<StartSessionPage> {
         decoration: BoxDecoration(
           color: isSelected
               ? CupertinoColors.activeBlue.withValues(alpha: 0.1)
-              : CupertinoColors.white,
+              : CupertinoColors.secondarySystemGroupedBackground,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
                     BoxShadow(

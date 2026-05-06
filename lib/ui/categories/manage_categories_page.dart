@@ -74,6 +74,7 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
     final categories = _state.categories;
 
     return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Categories'),
         trailing: CupertinoButton(
@@ -92,7 +93,7 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: CupertinoColors.white,
+                color: CupertinoColors.secondarySystemGroupedBackground,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
@@ -203,6 +204,7 @@ class _CategoryFormPageState extends State<_CategoryFormPage> {
     final category = FocusCategory(
       id: editing?.id ?? _uniqueIdFromName(name),
       name: name,
+      iconKey: categoryIconKeyForIconData(_selectedIcon),
       iconCodePoint: _selectedIcon.codePoint,
       iconFontFamily: _selectedIcon.fontFamily,
       iconFontPackage: _selectedIcon.fontPackage,

@@ -264,7 +264,7 @@ class _SessionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CupertinoColors.white,
+        color: CupertinoColors.secondarySystemGroupedBackground,
         borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:deep_work/models/category_icon_catalog.dart';
 import 'package:deep_work/models/focus_category.dart';
 
 class CategoriesState extends ChangeNotifier {
@@ -39,6 +40,7 @@ class CategoriesState extends ChangeNotifier {
       if (_categories.isEmpty) {
         _categories = _defaultCategories;
       }
+      await _persist();
     } catch (_) {
       _categories = _defaultCategories;
     }
@@ -61,7 +63,9 @@ class CategoriesState extends ChangeNotifier {
   }
 
   Future<void> updateCategory(FocusCategory category) async {
-    _categories = _categories.map((c) => c.id == category.id ? category : c).toList();
+    _categories = _categories
+        .map((c) => c.id == category.id ? category : c)
+        .toList();
     notifyListeners();
     await _persist();
   }
@@ -75,6 +79,12 @@ class CategoriesState extends ChangeNotifier {
     await _persist();
   }
 
+  @visibleForTesting
+  void resetForTesting() {
+    _categories = const [];
+    _isLoaded = false;
+  }
+
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
     final payload = jsonEncode(_categories.map(_toJson).toList());
@@ -85,6 +95,9 @@ class CategoriesState extends ChangeNotifier {
     return {
       'id': c.id,
       'name': c.name,
+      'iconKey':
+          normalizeCategoryIconKey(c.iconKey) ??
+          categoryIconKeyForIconData(c.icon),
       'iconCodePoint': c.iconCodePoint,
       'iconFontFamily': c.iconFontFamily,
       'iconFontPackage': c.iconFontPackage,
@@ -92,12 +105,26 @@ class CategoriesState extends ChangeNotifier {
   }
 
   static FocusCategory _fromJson(Map<String, dynamic> json) {
+    final codePoint =
+        (json['iconCodePoint'] as num?)?.toInt() ??
+        fallbackCategoryIcon.codePoint;
+    final iconKey =
+        normalizeCategoryIconKey(json['iconKey']?.toString()) ??
+        categoryIconKeyForStoredIcon(
+          codePoint: codePoint,
+          fontFamily: json['iconFontFamily']?.toString(),
+          fontPackage: json['iconFontPackage']?.toString(),
+        ) ??
+        fallbackCategoryIconKey;
+    final icon = categoryIconForKey(iconKey);
+
     return FocusCategory(
       id: (json['id'] ?? '').toString(),
       name: (json['name'] ?? '').toString(),
-      iconCodePoint: (json['iconCodePoint'] as num?)?.toInt() ?? CupertinoIcons.square.codePoint,
-      iconFontFamily: json['iconFontFamily']?.toString(),
-      iconFontPackage: json['iconFontPackage']?.toString(),
+      iconKey: iconKey,
+      iconCodePoint: icon.codePoint,
+      iconFontFamily: icon.fontFamily,
+      iconFontPackage: icon.fontPackage,
     );
   }
 
@@ -105,6 +132,7 @@ class CategoriesState extends ChangeNotifier {
     FocusCategory(
       id: 'reading',
       name: 'Reading',
+      iconKey: 'book',
       iconCodePoint: CupertinoIcons.book.codePoint,
       iconFontFamily: CupertinoIcons.iconFont,
       iconFontPackage: CupertinoIcons.iconFontPackage,
@@ -112,6 +140,7 @@ class CategoriesState extends ChangeNotifier {
     FocusCategory(
       id: 'writing',
       name: 'Writing',
+      iconKey: 'pencil',
       iconCodePoint: CupertinoIcons.pencil.codePoint,
       iconFontFamily: CupertinoIcons.iconFont,
       iconFontPackage: CupertinoIcons.iconFontPackage,
@@ -119,6 +148,7 @@ class CategoriesState extends ChangeNotifier {
     FocusCategory(
       id: 'coding',
       name: 'Coding',
+      iconKey: 'code',
       iconCodePoint: CupertinoIcons.chevron_left_slash_chevron_right.codePoint,
       iconFontFamily: CupertinoIcons.iconFont,
       iconFontPackage: CupertinoIcons.iconFontPackage,
@@ -126,6 +156,7 @@ class CategoriesState extends ChangeNotifier {
     FocusCategory(
       id: 'review',
       name: 'Review',
+      iconKey: 'search',
       iconCodePoint: CupertinoIcons.search.codePoint,
       iconFontFamily: CupertinoIcons.iconFont,
       iconFontPackage: CupertinoIcons.iconFontPackage,
@@ -133,6 +164,7 @@ class CategoriesState extends ChangeNotifier {
     FocusCategory(
       id: 'work',
       name: 'Work',
+      iconKey: 'hammer',
       iconCodePoint: CupertinoIcons.hammer.codePoint,
       iconFontFamily: CupertinoIcons.iconFont,
       iconFontPackage: CupertinoIcons.iconFontPackage,
@@ -140,6 +172,7 @@ class CategoriesState extends ChangeNotifier {
     FocusCategory(
       id: 'other',
       name: 'Other',
+      iconKey: 'ellipsis',
       iconCodePoint: CupertinoIcons.ellipsis.codePoint,
       iconFontFamily: CupertinoIcons.iconFont,
       iconFontPackage: CupertinoIcons.iconFontPackage,

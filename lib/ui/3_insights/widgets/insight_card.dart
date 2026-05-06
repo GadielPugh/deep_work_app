@@ -10,7 +10,7 @@ class InsightCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: CupertinoColors.white,
+        color: CupertinoColors.secondarySystemGroupedBackground,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -24,4 +24,3 @@ class InsightCard extends StatelessWidget {
     );
   }
 }
-

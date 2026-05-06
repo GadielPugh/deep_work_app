@@ -61,4 +61,10 @@ class SessionsState extends ChangeNotifier {
 
   /// Alias for load (e.g. after external changes)
   Future<void> reload() => load();
+
+  @visibleForTesting
+  void resetForTesting() {
+    _sessions = [];
+    _isLoaded = false;
+  }
 }

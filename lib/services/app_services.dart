@@ -1,4 +1,5 @@
 import 'package:deep_work/services/storage/local_session_storage_service.dart';
+import 'package:deep_work/services/feedback/feedback_service.dart';
 import 'package:deep_work/services/storage/local_coach_storage_service.dart';
 import 'package:deep_work/services/storage/local_shadow_prediction_storage_service.dart';
 import 'package:deep_work/services/storage/session_storage_service.dart';
@@ -18,6 +19,7 @@ final class AppServices {
   static LocalCoachStorageService coachStorage = LocalCoachStorageService();
   static LocalShadowPredictionStorageService shadowPredictionStorage =
       LocalShadowPredictionStorageService();
+  static FeedbackService feedbackService = FormspreeFeedbackService();
   static LocalPersonalizationProfileService personalizationProfileService =
       LocalPersonalizationProfileService();
 

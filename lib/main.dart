@@ -5,9 +5,7 @@ import 'package:deep_work/state/sessions_state.dart';
 import 'package:deep_work/ui/1_principal_function/startSession.dart';
 import 'package:deep_work/ui/2_history/historyTab.dart';
 import 'package:deep_work/ui/3_insights/insightsTab.dart';
-import 'package:deep_work/ui/categories/manage_categories_page.dart';
-// TEMPORARILY DISABLED (v1): Settings tab is ignored for now.
-// import 'package:deep_work/ui/4_settings/settingsTab.dart';
+import 'package:deep_work/ui/4_settings/settingsTab.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       debugShowCheckedModeBanner: false,
-      title: 'DeepFocus', 
+      title: 'DeepFocus',
       theme: const CupertinoThemeData(
         primaryColor: CupertinoColors.systemBlue,
         brightness: Brightness.light,
@@ -34,10 +32,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-
-
 
 // TAB BAR ----------------------------------
 
@@ -61,11 +55,6 @@ class MainTabView extends StatelessWidget {
             icon: Icon(CupertinoIcons.chart_bar_alt_fill),
             label: 'Insights',
           ),
-          // TEMPORARILY DISABLED (v1): Settings tab is ignored for now.
-          // BottomNavigationBarItem(
-          //   icon: Icon(CupertinoIcons.settings),
-          //   label: 'Settings',
-          // ),
         ],
       ),
       tabBuilder: (context, index) {
@@ -83,11 +72,6 @@ class MainTabView extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
 
 // MAIN SCREEN ----------------------------------
 class _FocusMetric extends StatelessWidget {
@@ -111,9 +95,9 @@ class _FocusMetric extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
+            color: color.withValues(alpha: 0.15),
             shape: BoxShape.circle,
-            border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+            border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
           ),
           child: Icon(icon, color: color, size: 24),
         ),
@@ -169,7 +153,7 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     // FUTURE VERSION NOTE:
     // We previously personalized greeting by time-of-day + user profile name.
-    
+
     final now = DateTime.now();
     final hour = now.hour;
     final greeting = hour < 12
@@ -184,20 +168,16 @@ class _HomeTabState extends State<HomeTab> {
       navigationBar: CupertinoNavigationBar(
         middle: Text(
           'DeepFocus',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () {
             Navigator.of(context).push(
-              CupertinoPageRoute(
-                builder: (context) => const ManageCategoriesPage(),
-              ),
+              CupertinoPageRoute(builder: (context) => const SettingsPage()),
             );
           },
-          child: const Icon(CupertinoIcons.square_grid_2x2),
+          child: const Icon(CupertinoIcons.settings),
         ),
       ),
       child: SafeArea(
@@ -205,7 +185,6 @@ class _HomeTabState extends State<HomeTab> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
@@ -231,25 +210,22 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
 
-
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.white,
+                  color: CupertinoColors.secondarySystemGroupedBackground,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
                       color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
-                    ), 
+                    ),
                   ],
                 ),
-
-
 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
