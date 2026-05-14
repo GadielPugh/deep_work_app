@@ -1,241 +1,87 @@
-# Deep Work App
+# DeepFocus
 
-A simple focus app built with Flutter that helps users plan sessions, reflect after working, and receive a small personalized coach message.
+<p align="center">
+  <img src="android/app/src/main/deepfocus-playstore.png" width="160" alt="DeepFocus Logo">
+</p>
 
-The goal of this project is not to overwhelm the user with complex analytics.  
-Instead, the app gives **clear, simple, and helpful guidance** based on focus history, outcomes, reflections, and local learning over time.
-
----
-
-## Overview
-
-Deep Work App is designed for students and other users who want to understand **when they focus better**, **what kind of work fits certain moments**, and **how to improve their study/work habits**.
-
-The app starts with a **cold-start recommendation system** so it can work even for a new user with no history.  
-Then, as the user keeps using the app, it **adapts locally** based on:
-
-- completed sessions
-- session outcomes
-- reflection notes
-- coach feedback
-- time-of-day patterns
-- category success patterns
-
-This means the app is useful from the beginning, but becomes more personal over time.
+DeepFocus is a privacy-first deep work assistant that leverages local usage patterns to recommend the most effective focus sessions. Unlike traditional productivity trackers, it uses a "cold-start" heuristic engine that evolves into a personalized coach without your data ever leaving the device.
 
 ---
 
-## Main Idea
+## 🚀 Features (Technical Standpoint)
 
-The core product idea is very simple:
-
-- the user opens the app
-- the app suggests one helpful focus action
-- the app learns from what happens next
-
-Instead of showing a large dashboard, the app focuses on **one small coach message** that answers:
-
-1. What should I do now?
-2. Is this a good time or a weak time?
-3. Is there a better time later?
+- **Layered Architecture**: Follows a strict `UI → State Management → Service` pattern to ensure separation of concerns and testability.
+- **Local-First Recommendation Engine**: Implements a heuristic scoring system that analyzes time-of-day success probability, category momentum, and session duration preferences.
+- **Structured Persistence**: Utilizes a SQLite schema optimized for time-series analysis, allowing for easy export of session data for external ML training.
+- **ML Shadow Mode**: Features a background inference pipeline that runs experimental logistic regression models alongside the live heuristic engine to validate predictive accuracy.
+- **Offline Text Analysis**: Locally processes post-session reflections to identify recurring productivity blockers and environmental factors.
 
 ---
 
-## Features
+## 🛠 Tech Stack
 
-### Focus Sessions
-- create and track focus sessions
-- store category, intention, duration, outcome, and reflection
-- use past sessions to build personalized recommendations
-
-### Simple Coach Card
-- one plain-language recommendation
-- suggests a category and session duration
-- uses cautious wording when data is weak
-- avoids technical or confusing analytics
-
-### Cold Start + Local Personalization
-- works even with zero user history
-- starts from safe default priors
-- updates locally after every completed session
-- improves recommendations based on real user behavior
-
-### Reflection-Aware Insights
-- stores reflection text
-- extracts repeated themes locally
-- uses soft human wording when patterns appear
-- keeps the experience simple and understandable
-
-### Coach Feedback
-- users can mark the coach as:
-  - Helpful
-  - Not helpful
-- optional reason selection helps improve future logic
-
-### ML Shadow Mode
-- an experimental ML pipeline exists in the background
-- it does **not** replace the live coach in the current version
-- it is used for future validation and model development
+- **Framework:** Flutter (^3.10.8)
+- **Language:** Dart
+- **Database:** sqflite (SQLite) for structured local storage.
+- **State Management:** Layered `ChangeNotifier` and Service providers.
+- **Preferences:** `shared_preferences` for lightweight settings and profile metadata.
 
 ---
 
-## How the Recommendation System Works
+## 📱 UI Preview
 
-The live recommendation system currently uses:
-
-- **default priors** for new users
-- **local personalization** from real user history
-- **session outcomes**
-- **time block patterns**
-- **category success rates**
-- **preferred duration buckets**
-- **reflection theme counts**
-- **coach feedback**
-
-This makes the app functional at launch without requiring a pretrained real-user dataset.
-
-The current production path is:
-
-**default priors + local personalization + simple coach UI**
-
-The future path is:
-
-**real usage data + validated ML + cautious blending later**
+| Personalized Coaching | Focus History & Insights |
+| :---: | :---: |
+| !Coach UI | !History UI |
+*Replace placeholders with screenshots from `lib/ui/`*
 
 ---
 
-## Why This Design?
+## ⚙️ Getting Started
 
-Many productivity apps show too many numbers, charts, and technical insights.
+### Prerequisites
+- Flutter SDK installed on your machine.
+- An Android or iOS emulator/physical device.
 
-This project takes a different direction:
+### Installation
 
-- less dashboard
-- less noise
-- more clarity
-- more actionable recommendations
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/GadielPugh/deep_work_app.git
+   cd deep_work_app
+   ```
 
-The app should feel like a small assistant, not a report.
+2. **Install dependencies:**
+   ```bash
+   flutter pub get
+   ```
 
----
-
-## Tech Stack
-
-- **Flutter**
-- **Dart**
-- local storage for sessions, feedback, coach snapshots, and shadow predictions
-- Python-based ML training pipeline for offline experimentation
-- JSON-exported model artifacts for future app-side inference
-
----
-
-## ML / Personalization Status
-
-### Current Live System
-- cold-start priors
-- local profile learning
-- personalized scoring
-- coach message generation
-
-### Current Experimental System
-- synthetic-data ML pipeline
-- exported JSON logistic regression model
-- shadow-mode inference
-- local export for future retraining on real usage data
-
-### Important Note
-The current app does **not** rely on a fully trained real-user ML model to function.  
-This is intentional.
-
-The app is already usable without real training data, and becomes more personalized as the user continues to use it.
+3. **Run the app:**
+   ```bash
+   flutter run
+   ```
 
 ---
 
-## Privacy Direction
+## 🛡 Privacy & Data
 
-The app is designed around **local-first personalization**.
-
-Current recommendation updates are based on data stored locally on the device, including:
-
-- sessions
-- outcomes
-- reflections
-- coach feedback
-- personalization profile
-- shadow prediction logs
-
-This keeps the system practical for a first version while preparing for future validation and model improvements.
+DeepFocus is designed with a **Zero-Server architecture**.
+- No accounts or cloud synchronization.
+- All session data and reflections are stored in a local SQLite database.
+- View the full Privacy Policy here.
 
 ---
 
-## Project Structure
+## 📄 License
 
-This project includes:
+This project is licensed under the **GNU General Public License Version 3**:
 
-- focus session tracking
-- coach message logic
-- local personalization profile
-- coach feedback logging
-- ML shadow mode
-- export pipeline for real local data
-- Python training pipeline for experimentation
+> GNU GENERAL PUBLIC LICENSE  
+> Version 3, 29 June 2007
+>
+> Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+> Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
 
 ---
 
-## Current Goal
-
-The current goal of the project is to build a focus app that is:
-
-- simple
-- useful
-- adaptive
-- explainable
-- ready for real user validation
-
-The app is not trying to look “smart” with complex dashboards.  
-It is trying to give the user **one helpful next step**.
-
----
-
-## Future Work
-
-Planned future improvements include:
-
-- validating the ML pipeline on real usage data
-- blending ML with heuristics carefully
-- improving reflection understanding
-- improving recommendation calibration
-- refining the coach with real feedback patterns
-- possible future on-device model improvements
-
----
-
-## Status
-
-This project is currently in an active development stage, with the main focus on:
-
-- recommendation quality
-- personalization stability
-- coach usefulness
-- real-world testing
-- release readiness
-
----
-
-## Author
-
-**Gadiel Pugh**
-
-Computer Science student interested in:
-- AI
-- software engineering
-- educational technology
-- practical, human-centered intelligent systems
-
----
-
-## Final Note
-
-Deep Work App is built around one simple belief:
-
-> a productivity app should not just collect data — it should help the user take the next useful step.
+**Author:** Gadiel Pugh
