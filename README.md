@@ -66,7 +66,7 @@ DeepFocus is a privacy-first deep work assistant that leverages local usage patt
 DeepFocus is designed with a **Zero-Server architecture**.
 - No accounts or cloud synchronization.
 - All session data and reflections are stored in a local SQLite database.
-- View the full Privacy Policy here.
+- View the full Privacy Policy <a href="/PrivacyPolicy.md">here</a.
 
 ---
 
