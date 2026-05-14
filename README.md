@@ -29,11 +29,9 @@ DeepFocus is a privacy-first deep work assistant that leverages local usage patt
 ---
 
 ## 📱 UI Preview
-
-| Personalized Coaching | Focus History & Insights |
-| :---: | :---: |
-| !Coach UI | !History UI |
-*Replace placeholders with screenshots from `lib/ui/`*
+| Main Screen | Personalized Coaching | Focus History & Insights |
+| :---: | :---: | :---: |
+| ![Main Screen](lib/ui/main.png) | ![Personalized Coaching](lib/ui/coach.png) | ![Focus History & Insights](lib/ui/history.png) |
 
 ---
 
